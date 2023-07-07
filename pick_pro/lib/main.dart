@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'metronome.dart';
 
 const Color darkBlue = Color(0xFF000c24);
 const Color blueGreen = Color.fromARGB(255, 121, 207, 175);
 
-void main() => runApp(MaterialApp(
-      home: Home(),
-    ));
+void main() => runApp(MaterialApp(routes: {
+      '/': (context) => Home(),
+      '/metronome': (context) => Metronome(),
+    }));
 
 class Home extends StatelessWidget {
   @override
@@ -77,7 +79,9 @@ class Home extends StatelessWidget {
                             ),
                           ),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/metronome');
+                        },
                         child: const Text(
                           'Metronome',
                           style: TextStyle(
