@@ -29,13 +29,6 @@ class _MetronomeState extends State<Metronome> {
     player.setAsset('assets/sounds/metronome.mp3');
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    player.dispose();
-    super.dispose();
-  }
-
   void start() {
     interval = 1000 ~/ (bpm / 60);
 
@@ -97,9 +90,23 @@ class _MetronomeState extends State<Metronome> {
                     },
                   ),
                 ),
-                Image.asset(
-                  'assets/images/guitar.png',
-                  fit: BoxFit.cover,
+                Stack(
+                  children: <Widget>[
+                    Image.asset(
+                      'assets/images/metronome.png',
+                      fit: BoxFit.cover,
+                    ),
+                    Slider(
+                      value: bpm.toDouble(),
+                      min: 20.0,
+                      max: 240.0,
+                      onChanged: (newValue) {
+                        setState(() {
+                          bpm = newValue.toInt();
+                        });
+                      },
+                    )
+                  ],
                 ),
                 TextButton(
                   style: ButtonStyle(
