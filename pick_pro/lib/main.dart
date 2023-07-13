@@ -1,13 +1,94 @@
 import 'package:flutter/material.dart';
 import 'metronome.dart';
+import 'chords.dart';
 
 const Color darkBlue = Color(0xFF000c24);
 const Color blueGreen = Color.fromARGB(255, 121, 207, 175);
 
-void main() => runApp(MaterialApp(routes: {
-      '/': (context) => Home(),
-      '/metronome': (context) => Metronome(),
-    }));
+void main() => runApp(MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: {
+              TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+              TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+              TargetPlatform.windows: CupertinoPageTransitionsBuilder()
+            },
+          ),
+        ),
+        routes: {
+          '/': (context) => Home(),
+          '/metronome': (context) => Metronome(),
+          '/chords': (context) => Chords(),
+        }));
+
+// SideBar for Navigating between pages
+class MyDrawer extends StatelessWidget {
+  // Tracking the current page
+  final int index;
+  MyDrawer({required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      backgroundColor: Color.fromARGB(255, 89, 152, 129),
+      width: 80,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(
+            height: 70,
+          ),
+          ListTile(
+            title: Opacity(
+                opacity: this.index == 0 ? 1 : 0.6,
+                child: Image.asset(
+                  'assets/images/home.png',
+                  width: 50,
+                  height: 50,
+                )),
+            selected: this.index == 0,
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/');
+            },
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          ListTile(
+            title: Opacity(
+                opacity: this.index == 1 ? 1 : 0.6,
+                child: Image.asset(
+                  'assets/images/metronome_icon.png',
+                  width: 40,
+                  height: 50,
+                )),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/metronome');
+            },
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          ListTile(
+            title: Opacity(
+                opacity: this.index == 2 ? 1 : 0.6,
+                child: Image.asset(
+                  'assets/images/chords.png',
+                  width: 30,
+                  height: 50,
+                )),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/chords');
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class Home extends StatelessWidget {
   @override
@@ -27,99 +108,36 @@ class Home extends StatelessWidget {
       body: Container(
         color: darkBlue,
         child: Center(
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/images/guitar.png',
-                      fit: BoxFit.cover,
-                    ),
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(0, 220.0, 0, 0),
-                      padding: const EdgeInsets.all(8),
-                      child: const Text(
-                        'PickPro',
-                        style: TextStyle(
-                            fontSize: 100.0,
-                            fontFamily: 'Caveat',
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                offset: Offset(2.0, 2.0),
-                                blurRadius: 4.0,
-                                color: Colors.grey,
-                              ),
-                            ]),
-                      ),
-                    ),
-                  ],
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Image.asset(
+                'assets/images/guitar.png',
+                fit: BoxFit.cover,
+              ),
+              Container(
+                margin: const EdgeInsets.fromLTRB(0, 220.0, 0, 0),
+                padding: const EdgeInsets.all(8),
+                child: const Text(
+                  'PickPro',
+                  style: TextStyle(
+                      fontSize: 100.0,
+                      fontFamily: 'Caveat',
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          offset: Offset(2.0, 2.0),
+                          blurRadius: 4.0,
+                          color: Colors.grey,
+                        ),
+                      ]),
                 ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      TextButton(
-                        style: ButtonStyle(
-                          foregroundColor:
-                              MaterialStateProperty.all<Color>(Colors.white),
-                          backgroundColor:
-                              MaterialStateProperty.all<Color>(blueGreen),
-                          overlayColor: MaterialStateProperty.all<Color>(
-                              Color.fromARGB(255, 47, 147, 122)),
-                          padding: MaterialStateProperty.all<EdgeInsets>(
-                              EdgeInsets.all(30)),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                            ),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/metronome');
-                        },
-                        child: const Text(
-                          'Metronome',
-                          style: TextStyle(
-                            fontSize: 24.0,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      TextButton(
-                        style: ButtonStyle(
-                          foregroundColor:
-                              MaterialStateProperty.all<Color>(Colors.white),
-                          backgroundColor:
-                              MaterialStateProperty.all<Color>(blueGreen),
-                          overlayColor: MaterialStateProperty.all<Color>(
-                              Color.fromARGB(255, 47, 147, 122)),
-                          padding: MaterialStateProperty.all<EdgeInsets>(
-                              EdgeInsets.all(30)),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                            ),
-                          ),
-                        ),
-                        onPressed: () {},
-                        child: const Text(
-                          'Custom Playback',
-                          style: TextStyle(
-                            fontSize: 24.0,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ]),
-              ]),
+              ),
+            ],
+          ),
         ),
       ),
+      drawer: MyDrawer(index: 0),
     );
   }
 }

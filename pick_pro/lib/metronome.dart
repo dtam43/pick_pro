@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'main.dart';
 import 'dart:ui' as ui;
 
 import 'dart:async';
@@ -225,104 +226,106 @@ class MetronomeState extends State<Metronome> {
     _angle = _getAngle();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'PickPro',
-          style: TextStyle(
-            fontSize: 40.0,
-            fontFamily: 'Caveat',
+        appBar: AppBar(
+          title: const Text(
+            'PickPro',
+            style: TextStyle(
+              fontSize: 40.0,
+              fontFamily: 'Caveat',
+            ),
           ),
+          centerTitle: true,
+          backgroundColor: blueGreen,
         ),
-        centerTitle: true,
-        backgroundColor: blueGreen,
-      ),
-      body: Container(
-        color: darkBlue,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Stack(alignment: Alignment.center, children: <Widget>[
-                Image.asset(
-                  'assets/images/metronome.png',
-                  fit: BoxFit.fill,
-                  width: 800,
-                  height: 1000,
-                ),
-                Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-                  SizedBox(
-                    width: 60.0,
-                    height: 30.0,
-                    child: TextField(
-                      textAlign: TextAlign.center,
-                      controller: _controller,
-                      keyboardType: TextInputType.number,
-                      enabled: !_isLocked,
-                      style: TextStyle(
-                        color: blueGreen,
-                        fontSize: 24.0,
+        body: Container(
+          color: darkBlue,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Stack(alignment: Alignment.center, children: <Widget>[
+                  Image.asset(
+                    'assets/images/metronome.png',
+                    fit: BoxFit.fill,
+                    width: 800,
+                    height: 1000,
+                  ),
+                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+                    SizedBox(
+                      width: 60.0,
+                      height: 30.0,
+                      child: TextField(
+                        textAlign: TextAlign.center,
+                        controller: _controller,
+                        keyboardType: TextInputType.number,
+                        enabled: !_isLocked,
+                        style: TextStyle(
+                          color: blueGreen,
+                          fontSize: 24.0,
+                        ),
+                        decoration: InputDecoration(
+                            hintText: _bpm.toString(),
+                            hintStyle:
+                                TextStyle(color: blueGreen, fontSize: 24),
+                            alignLabelWithHint: true,
+                            filled: true,
+                            fillColor: Colors.transparent,
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            contentPadding: EdgeInsets.zero),
+                        cursorColor: Colors.white,
+                        onSubmitted: (String value) {
+                          _controller.clear();
+                          _submitted(value);
+                        },
                       ),
-                      decoration: InputDecoration(
-                          hintText: _bpm.toString(),
-                          hintStyle: TextStyle(color: blueGreen, fontSize: 24),
-                          alignLabelWithHint: true,
-                          filled: true,
-                          fillColor: Colors.transparent,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: EdgeInsets.zero),
-                      cursorColor: Colors.white,
-                      onSubmitted: (String value) {
-                        _controller.clear();
-                        _submitted(value);
-                      },
                     ),
-                  ),
-                  LayoutBuilder(builder: (context, constraints) {
-                    return _stick(context, 400, 750);
-                  }),
+                    LayoutBuilder(builder: (context, constraints) {
+                      return _stick(context, 400, 750);
+                    }),
+                  ]),
                 ]),
-              ]),
-              TextButton(
-                style: ButtonStyle(
-                  foregroundColor:
-                      MaterialStateProperty.all<Color>(Colors.white),
-                  backgroundColor: MaterialStateProperty.all<Color>(blueGreen),
-                  overlayColor: MaterialStateProperty.all<Color>(
-                      const Color.fromARGB(255, 47, 147, 122)),
-                  padding: MaterialStateProperty.all<EdgeInsets>(
-                      const EdgeInsets.all(30)),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
+                TextButton(
+                  style: ButtonStyle(
+                    foregroundColor:
+                        MaterialStateProperty.all<Color>(Colors.white),
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(blueGreen),
+                    overlayColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 47, 147, 122)),
+                    padding: MaterialStateProperty.all<EdgeInsets>(
+                        const EdgeInsets.all(30)),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                    ),
+                  ),
+                  onPressed: _metronomeIs == MetronomeIs.stopping
+                      ? null
+                      : () {
+                          _metronomeIs == MetronomeIs.stopped
+                              ? _start()
+                              : _stop();
+                        },
+                  child: Text(
+                    _metronomeIs == MetronomeIs.stopped ? 'Play' : 'Stop',
+                    style: const TextStyle(
+                      fontSize: 24.0,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-                onPressed: _metronomeIs == MetronomeIs.stopping
-                    ? null
-                    : () {
-                        _metronomeIs == MetronomeIs.stopped
-                            ? _start()
-                            : _stop();
-                      },
-                child: Text(
-                  _metronomeIs == MetronomeIs.stopped ? 'Play' : 'Stop',
-                  style: const TextStyle(
-                    fontSize: 24.0,
-                    color: Colors.white,
-                  ),
+                const SizedBox(
+                  height: 30.0,
                 ),
-              ),
-              const SizedBox(
-                height: 30.0,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+        drawer: MyDrawer(index: 1));
   }
 
   // Widget to draw the metronome stick
