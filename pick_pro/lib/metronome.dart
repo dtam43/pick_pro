@@ -288,21 +288,7 @@ class MetronomeState extends State<Metronome> {
                   ]),
                 ]),
                 TextButton(
-                  style: ButtonStyle(
-                    foregroundColor:
-                        MaterialStateProperty.all<Color>(Colors.white),
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(blueGreen),
-                    overlayColor: MaterialStateProperty.all<Color>(
-                        const Color.fromARGB(255, 47, 147, 122)),
-                    padding: MaterialStateProperty.all<EdgeInsets>(
-                        const EdgeInsets.all(30)),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                    ),
-                  ),
+                  style: buttonStyle(),
                   onPressed: _metronomeIs == MetronomeIs.stopping
                       ? null
                       : () {
@@ -312,10 +298,7 @@ class MetronomeState extends State<Metronome> {
                         },
                   child: Text(
                     _metronomeIs == MetronomeIs.stopped ? 'Play' : 'Stop',
-                    style: const TextStyle(
-                      fontSize: 24.0,
-                      color: Colors.white,
-                    ),
+                    style: buttonText(),
                   ),
                 ),
                 const SizedBox(

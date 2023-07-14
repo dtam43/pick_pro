@@ -21,6 +21,29 @@ void main() => runApp(MaterialApp(
           '/chords': (context) => Chords(),
         }));
 
+// Preset Styles
+ButtonStyle buttonStyle() {
+  return ButtonStyle(
+    foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+    backgroundColor: MaterialStateProperty.all<Color>(blueGreen),
+    overlayColor: MaterialStateProperty.all<Color>(
+        const Color.fromARGB(255, 47, 147, 122)),
+    padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(30)),
+    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+    ),
+  );
+}
+
+TextStyle buttonText() {
+  return const TextStyle(
+    fontSize: 24.0,
+    color: Colors.white,
+  );
+}
+
 // SideBar for Navigating between pages
 class MyDrawer extends StatelessWidget {
   // Tracking the current page
