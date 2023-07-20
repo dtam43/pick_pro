@@ -304,55 +304,81 @@ List<Widget> getOneLetter() {
 
 // Widget list for all chords
 List<Widget> getAllChords() {
-  return [
-    // TODO: Add every guitar chord
-    Image.asset(
-      'assets/images/chords/c_major.png',
-      fit: BoxFit.fitHeight,
-    ),
-    Image.asset(
-      'assets/images/chords/d_major.png',
-      fit: BoxFit.fitHeight,
-    ),
-    Image.asset(
-      'assets/images/chords/e_major.png',
-      fit: BoxFit.fitHeight,
-    ),
-    Image.asset(
-      'assets/images/chords/f_major.png',
-      fit: BoxFit.fitHeight,
-    ),
-    Image.asset(
-      'assets/images/chords/g_major.png',
-      fit: BoxFit.fitHeight,
-    ),
-    Image.asset(
-      'assets/images/chords/a_major.png',
-      fit: BoxFit.fitHeight,
-    ),
-    Image.asset(
-      'assets/images/chords/b_major.png',
-      fit: BoxFit.fitHeight,
-    ),
-    Image.asset(
-      'assets/images/chords/bb_major.png',
-      fit: BoxFit.fitHeight,
-    ),
-    Image.asset(
-      'assets/images/chords/db_major.png',
-      fit: BoxFit.fitHeight,
-    ),
-    Image.asset(
-      'assets/images/chords/eb_major.png',
-      fit: BoxFit.fitHeight,
-    ),
-    Image.asset(
-      'assets/images/chords/gb_major.png',
-      fit: BoxFit.fitHeight,
-    ),
-    Image.asset(
-      'assets/images/chords/ab_major.png',
-      fit: BoxFit.fitHeight,
-    ),
-  ];
+  List<Widget> allChords = [];
+
+  // Add all chords to list
+  for (String chord in showChords) {
+    for (String t in tune) {
+      // Cancel add if chord doesn't exist (i.e. Cb or E#)
+      if ((chord == 'c' && t == 'b') ||
+          (chord == 'e' && t == '#') ||
+          (chord == 'f' && t == 'b') ||
+          (chord == 'b' && t == '#')) {
+        continue;
+      }
+
+      // Add all chords of one note
+      allChords.add(Image.asset(
+        'assets/images/chords/$chord${t}_major.png',
+        fit: BoxFit.fitHeight,
+      ));
+
+      allChords.add(Image.asset(
+        'assets/images/chords/$chord${t}_minor.png',
+        fit: BoxFit.fitHeight,
+      ));
+
+      allChords.add(Image.asset(
+        'assets/images/chords/$chord${t}_7.png',
+        fit: BoxFit.fitHeight,
+      ));
+
+      allChords.add(Image.asset(
+        'assets/images/chords/$chord${t}_5.png',
+        fit: BoxFit.fitHeight,
+      ));
+
+      allChords.add(Image.asset(
+        'assets/images/chords/$chord${t}_dim.png',
+        fit: BoxFit.fitHeight,
+      ));
+
+      allChords.add(Image.asset(
+        'assets/images/chords/$chord${t}_dim7.png',
+        fit: BoxFit.fitHeight,
+      ));
+
+      allChords.add(Image.asset(
+        'assets/images/chords/$chord${t}_aug.png',
+        fit: BoxFit.fitHeight,
+      ));
+
+      allChords.add(Image.asset(
+        'assets/images/chords/$chord${t}_sus2.png',
+        fit: BoxFit.fitHeight,
+      ));
+
+      allChords.add(Image.asset(
+        'assets/images/chords/$chord${t}_sus4.png',
+        fit: BoxFit.fitHeight,
+      ));
+
+      allChords.add(Image.asset(
+        'assets/images/chords/$chord${t}_maj7.png',
+        fit: BoxFit.fitHeight,
+      ));
+
+      allChords.add(Image.asset(
+        'assets/images/chords/$chord${t}_m7.png',
+        fit: BoxFit.fitHeight,
+      ));
+
+      allChords.add(Image.asset(
+        'assets/images/chords/$chord${t}_7sus4.png',
+        fit: BoxFit.fitHeight,
+      ));
+    }
+  }
+
+  return allChords;
 }
