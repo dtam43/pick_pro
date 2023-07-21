@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'metronome.dart';
 import 'chords.dart';
+import 'player.dart';
 
 const Color darkBlue = Color(0xFF000c24);
 const Color blueGreen = Color.fromARGB(255, 121, 207, 175);
@@ -19,6 +20,7 @@ void main() => runApp(MaterialApp(
           '/': (context) => Home(),
           '/metronome': (context) => Metronome(),
           '/chords': (context) => Chords(),
+          '/player': (context) => Playback(),
         }));
 
 // Preset Styles
@@ -63,13 +65,12 @@ class MyDrawer extends StatelessWidget {
           ),
           ListTile(
             title: Opacity(
-                opacity: this.index == 0 ? 1 : 0.6,
+                opacity: index == 0 ? 1 : 0.6,
                 child: Image.asset(
                   'assets/images/home.png',
                   width: 50,
                   height: 50,
                 )),
-            selected: this.index == 0,
             onTap: () {
               Navigator.pop(context);
               Navigator.pushNamed(context, '/');
@@ -80,7 +81,7 @@ class MyDrawer extends StatelessWidget {
           ),
           ListTile(
             title: Opacity(
-                opacity: this.index == 1 ? 1 : 0.6,
+                opacity: index == 1 ? 1 : 0.6,
                 child: Image.asset(
                   'assets/images/metronome_icon.png',
                   width: 40,
@@ -96,7 +97,7 @@ class MyDrawer extends StatelessWidget {
           ),
           ListTile(
             title: Opacity(
-                opacity: this.index == 2 ? 1 : 0.6,
+                opacity: index == 2 ? 1 : 0.6,
                 child: Image.asset(
                   'assets/images/chords.png',
                   width: 30,
@@ -105,6 +106,22 @@ class MyDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.pushNamed(context, '/chords');
+            },
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          ListTile(
+            title: Opacity(
+                opacity: index == 3 ? 1 : 0.6,
+                child: Image.asset(
+                  'assets/images/player.png',
+                  width: 30,
+                  height: 50,
+                )),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/player');
             },
           ),
         ],
