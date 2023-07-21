@@ -19,9 +19,9 @@ class PlaybackState extends State<Playback> {
   final player = AudioPlayer();
 
   late Duration songLength;
-  late Duration currentTime;
+  Duration currentTime = Duration.zero;
   double playbackSpeed = 1;
-  String assetPath = 'assets/sounds/demo_song.mp3';
+  String assetPath = 'sounds/demoSong.mp3';
   bool isPlaying = false;
   int bpm = 100;
 
@@ -29,17 +29,18 @@ class PlaybackState extends State<Playback> {
   void initState() {
     super.initState();
 
-    player.setReleaseMode(ReleaseMode.STOP);
+    player.setReleaseMode(ReleaseMode.stop);
+
+    player.setSourceAsset(assetPath);
 
     // Set defualt song
-    player.setUrl(assetPath, isLocal: true);
-    currentTime = Duration.zero;
+    player.setSource(AssetSource(assetPath));
     songLength = const Duration(seconds: 259);
 
     // Listeners for changes in player states
     player.onPlayerStateChanged.listen((state) {
       setState(() {
-        isPlaying = state == PlayerState.PLAYING;
+        isPlaying = state == PlayerState.playing;
       });
     });
 
@@ -49,16 +50,17 @@ class PlaybackState extends State<Playback> {
       });
     });
 
-    player.onAudioPositionChanged.listen((newCurrentTime) {
+    player.onPositionChanged.listen((newCurrentTime) {
       setState(() {
-        currentTime = newCurrentTime;
+        if (isPlaying) {
+          currentTime = newCurrentTime;
+        }
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    print(formatTime(currentTime));
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -86,10 +88,11 @@ class PlaybackState extends State<Playback> {
                 max: songLength.inSeconds.toDouble(),
                 value: currentTime.inSeconds.toDouble(),
                 onChanged: (value) {
-                  final position = Duration(seconds: value.toInt());
-                  player.pause();
-                  player.seek(position);
-                  setState(() {});
+                  currentTime = Duration(seconds: value.toInt());
+                  setState(() {
+                    player.pause();
+                    player.seek(currentTime);
+                  });
                 }),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -114,10 +117,14 @@ class PlaybackState extends State<Playback> {
               iconSize: 50,
               onPressed: () {
                 if (isPlaying) {
-                  player.pause();
+                  setState(() {
+                    player.pause();
+                  });
                 } else {
-                  player.seek(currentTime);
-                  player.resume();
+                  setState(() {
+                    player.resume();
+                    print(formatTime(currentTime));
+                  });
                 }
               },
             ),
