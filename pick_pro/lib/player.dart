@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pick_pro/main.dart';
 import 'package:pick_pro/metronome.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter_media_metadata/flutter_media_metadata.dart';
+import 'dart:io';
 
 const Color darkBlue = Color(0xFF000c24);
 const Color blueGreen = Color.fromARGB(255, 121, 207, 175);
@@ -18,12 +22,22 @@ class Playback extends StatefulWidget {
 class PlaybackState extends State<Playback> {
   final player = AudioPlayer();
 
+  Metadata metaData = Metadata(
+      trackName: 'Demo Song',
+      trackArtistNames: ['David Tam'],
+      albumArt: Uint8List(128));
   late Duration songLength;
   Duration currentTime = Duration.zero;
   double playbackSpeed = 1;
   String assetPath = 'sounds/demoSong.mp3';
   bool isPlaying = false;
   int bpm = 100;
+
+  @override
+  void dispose() {
+    player.stop();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -36,6 +50,8 @@ class PlaybackState extends State<Playback> {
     // Set defualt song
     player.setSource(AssetSource(assetPath));
     songLength = const Duration(seconds: 259);
+
+    loadMetaData(File(assetPath));
 
     // Listeners for changes in player states
     player.onPlayerStateChanged.listen((state) {
@@ -59,6 +75,20 @@ class PlaybackState extends State<Playback> {
     });
   }
 
+  // Load file from device and set audio player source
+  void loadFile(FilePickerResult result) async {
+    File file = File(result.files.first.path!.toString());
+    player.setSource(DeviceFileSource(file.path));
+
+    // Gather metadata from mp3
+    loadMetaData(file);
+  }
+
+  // Loading meta data from mp3
+  void loadMetaData(File file) async {
+    metaData = await MetadataRetriever.fromFile(file);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,7 +96,7 @@ class PlaybackState extends State<Playback> {
         title: const Text(
           'PickPro',
           style: TextStyle(
-            fontSize: 40.0,
+            fontSize: 32.0,
             fontFamily: 'Caveat',
           ),
         ),
@@ -78,11 +108,35 @@ class PlaybackState extends State<Playback> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const SizedBox(
-              height: 32,
+            TextButton(
+              style: buttonStyle(),
+              // Open file picking menu
+              onPressed: () async {
+                final result = await FilePicker.platform.pickFiles(
+                    type: FileType.custom, allowedExtensions: ['mp3']);
+
+                // Load file if a proper file is chosen
+                if (result != null) {
+                  loadFile(result);
+                }
+
+                setState(() {});
+              },
+              child: Text(
+                "Import Media",
+                style: buttonText(),
+              ),
             ),
-            Text('Get Song Name from metadata', style: buttonText()),
-            const SizedBox(height: 20),
+            const SizedBox(
+              height: 16,
+            ),
+            Image.memory(metaData.albumArt!, height: 256, width: 256),
+            const SizedBox(height: 5),
+            Text('${metaData.trackName}', style: buttonText()),
+            Text(
+                '${metaData.trackArtistNames.toString().substring(1, metaData.trackArtistNames.toString().length - 1)}',
+                style: buttonText()),
+            const SizedBox(height: 5),
             Slider(
                 min: 0,
                 max: songLength.inSeconds.toDouble(),
@@ -110,25 +164,48 @@ class PlaybackState extends State<Playback> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-            IconButton(
-              icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow,
-                  color: Colors.white),
-              iconSize: 50,
-              onPressed: () {
-                if (isPlaying) {
-                  setState(() {
-                    player.pause();
-                  });
-                } else {
-                  setState(() {
-                    player.resume();
-                    print(formatTime(currentTime));
-                  });
-                }
-              },
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  child: Text('-10', style: buttonText()),
+                  style: buttonStyle(),
+                  onPressed: () {
+                    currentTime = currentTime - Duration(seconds: 10);
+                    if (currentTime.inSeconds < 0) currentTime = Duration.zero;
+                    player.seek(currentTime);
+                  },
+                ),
+                IconButton(
+                  icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow,
+                      color: Colors.white),
+                  iconSize: 50,
+                  onPressed: () {
+                    if (isPlaying) {
+                      setState(() {
+                        player.pause();
+                      });
+                    } else {
+                      setState(() {
+                        player.resume();
+                        print(formatTime(currentTime));
+                      });
+                    }
+                  },
+                ),
+                TextButton(
+                  child: Text('+10', style: buttonText()),
+                  style: buttonStyle(),
+                  onPressed: () {
+                    currentTime = currentTime + Duration(seconds: 10);
+                    if (currentTime > songLength) currentTime = songLength;
+                    player.seek(currentTime);
+                  },
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             Slider(
                 min: 0.5,
                 max: 1.5,
@@ -146,7 +223,7 @@ class PlaybackState extends State<Playback> {
               ),
             ),
             const SizedBox(
-              height: 30,
+              height: 10,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -155,8 +232,8 @@ class PlaybackState extends State<Playback> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(
-                        width: 120,
-                        height: 30,
+                        width: 80,
+                        height: 15,
                         child: TextField(
                             textAlign: TextAlign.center,
                             controller: _hintController,
@@ -164,7 +241,7 @@ class PlaybackState extends State<Playback> {
                             decoration: const InputDecoration(
                                 hintText: 'Song BPM:',
                                 hintStyle:
-                                    TextStyle(color: blueGreen, fontSize: 24),
+                                    TextStyle(color: blueGreen, fontSize: 14),
                                 filled: true,
                                 fillColor: Colors.transparent,
                                 border: InputBorder.none,
@@ -175,19 +252,19 @@ class PlaybackState extends State<Playback> {
                             onSubmitted: (String value) {})),
                     SizedBox(
                       width: 60.0,
-                      height: 30.0,
+                      height: 15.0,
                       child: TextField(
                         textAlign: TextAlign.center,
                         controller: _controller,
                         keyboardType: TextInputType.number,
                         style: const TextStyle(
                           color: blueGreen,
-                          fontSize: 24.0,
+                          fontSize: 14.0,
                         ),
                         decoration: InputDecoration(
                             hintText: '${bpm}',
                             hintStyle:
-                                const TextStyle(color: blueGreen, fontSize: 24),
+                                const TextStyle(color: blueGreen, fontSize: 14),
                             alignLabelWithHint: true,
                             filled: true,
                             fillColor: Colors.transparent,
@@ -214,8 +291,8 @@ class PlaybackState extends State<Playback> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(
-                        width: 145,
-                        height: 30,
+                        width: 90,
+                        height: 15,
                         child: TextField(
                             textAlign: TextAlign.center,
                             controller: _hintController,
@@ -223,7 +300,7 @@ class PlaybackState extends State<Playback> {
                             decoration: const InputDecoration(
                                 hintText: 'Desired BPM:',
                                 hintStyle:
-                                    TextStyle(color: blueGreen, fontSize: 24),
+                                    TextStyle(color: blueGreen, fontSize: 14),
                                 filled: true,
                                 fillColor: Colors.transparent,
                                 border: InputBorder.none,
@@ -234,19 +311,19 @@ class PlaybackState extends State<Playback> {
                             onSubmitted: (String value) {})),
                     SizedBox(
                       width: 60.0,
-                      height: 30.0,
+                      height: 15.0,
                       child: TextField(
                         textAlign: TextAlign.center,
                         controller: _speedController,
                         keyboardType: TextInputType.number,
                         style: const TextStyle(
                           color: blueGreen,
-                          fontSize: 24.0,
+                          fontSize: 14.0,
                         ),
                         decoration: InputDecoration(
                             hintText: '${bpm * playbackSpeed}',
                             hintStyle:
-                                TextStyle(color: blueGreen, fontSize: 24),
+                                TextStyle(color: blueGreen, fontSize: 14),
                             alignLabelWithHint: true,
                             filled: true,
                             fillColor: Colors.transparent,

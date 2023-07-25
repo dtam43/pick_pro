@@ -30,10 +30,10 @@ ButtonStyle buttonStyle() {
     backgroundColor: MaterialStateProperty.all<Color>(blueGreen),
     overlayColor: MaterialStateProperty.all<Color>(
         const Color.fromARGB(255, 47, 147, 122)),
-    padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(30)),
+    padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(5)),
     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
       RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15.0),
+        borderRadius: BorderRadius.circular(10.0),
       ),
     ),
   );
@@ -41,7 +41,7 @@ ButtonStyle buttonStyle() {
 
 TextStyle buttonText() {
   return const TextStyle(
-    fontSize: 24.0,
+    fontSize: 14.0,
     color: Colors.white,
   );
 }

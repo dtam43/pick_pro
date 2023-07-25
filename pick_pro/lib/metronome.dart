@@ -230,7 +230,7 @@ class MetronomeState extends State<Metronome> {
           title: const Text(
             'PickPro',
             style: TextStyle(
-              fontSize: 40.0,
+              fontSize: 32.0,
               fontFamily: 'Caveat',
             ),
           ),
@@ -248,13 +248,13 @@ class MetronomeState extends State<Metronome> {
                   Image.asset(
                     'assets/images/metronome.png',
                     fit: BoxFit.fill,
-                    width: 800,
-                    height: 1000,
+                    width: 400,
+                    height: 500,
                   ),
                   Column(mainAxisAlignment: MainAxisAlignment.start, children: [
                     SizedBox(
-                      width: 60.0,
-                      height: 30.0,
+                      width: 30.0,
+                      height: 15.0,
                       child: TextField(
                         textAlign: TextAlign.center,
                         controller: _controller,
@@ -262,12 +262,12 @@ class MetronomeState extends State<Metronome> {
                         enabled: !_isLocked,
                         style: TextStyle(
                           color: blueGreen,
-                          fontSize: 24.0,
+                          fontSize: 14.0,
                         ),
                         decoration: InputDecoration(
                             hintText: _bpm.toString(),
                             hintStyle:
-                                TextStyle(color: blueGreen, fontSize: 24),
+                                TextStyle(color: blueGreen, fontSize: 14),
                             alignLabelWithHint: true,
                             filled: true,
                             fillColor: Colors.transparent,
@@ -283,7 +283,7 @@ class MetronomeState extends State<Metronome> {
                       ),
                     ),
                     LayoutBuilder(builder: (context, constraints) {
-                      return _stick(context, 400, 750);
+                      return _stick(context, 200.0, 375.0);
                     }),
                   ]),
                 ]),
@@ -302,7 +302,7 @@ class MetronomeState extends State<Metronome> {
                   ),
                 ),
                 const SizedBox(
-                  height: 30.0,
+                  height: 15.0,
                 ),
               ],
             ),

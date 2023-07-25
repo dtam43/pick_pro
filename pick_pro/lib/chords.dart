@@ -23,7 +23,7 @@ class ChordState extends State<Chords> {
         title: const Text(
           'PickPro',
           style: TextStyle(
-            fontSize: 40.0,
+            fontSize: 32.0,
             fontFamily: 'Caveat',
           ),
         ),
@@ -39,7 +39,7 @@ class ChordState extends State<Chords> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(
-                  height: 30,
+                  height: 15,
                 ),
                 const Text(
                   'Chords List',
@@ -50,7 +50,7 @@ class ChordState extends State<Chords> {
                   ),
                 ),
                 const SizedBox(
-                  height: 30,
+                  height: 15,
                 ),
                 TextButton(
                   style: buttonStyle(),
@@ -64,10 +64,10 @@ class ChordState extends State<Chords> {
                   ),
                 ),
                 const SizedBox(
-                  height: 20,
+                  height: 10,
                 ),
                 Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       TextButton(
@@ -149,7 +149,7 @@ class ChordState extends State<Chords> {
                       ),
                     ]),
                 const SizedBox(
-                  height: 20,
+                  height: 10,
                 ),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -190,14 +190,14 @@ class ChordState extends State<Chords> {
                       ),
                     ]),
                 const SizedBox(
-                  height: 50,
+                  height: 25,
                 ),
               ],
             ),
             Builder(
               builder: (context) {
                 double screenWidth = MediaQuery.of(context).size.width;
-                int itemsPerRow = (screenWidth / 400).floor();
+                int itemsPerRow = (screenWidth / 200).floor();
 
                 return Row(
                     mainAxisAlignment: MainAxisAlignment.center,
