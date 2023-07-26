@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pick_pro/main.dart';
+import '/src/drawer.dart';
+import '/src/styles.dart';
 
 const Color darkBlue = Color(0xFF000c24);
 const Color blueGreen = Color.fromARGB(255, 121, 207, 175);
@@ -18,12 +19,14 @@ class Chords extends StatefulWidget {
 class ChordState extends State<Chords> {
   @override
   Widget build(BuildContext context) {
+    SizeManager size = SizeManager(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'PickPro',
           style: TextStyle(
-            fontSize: 32.0,
+            fontSize: size.barFont,
             fontFamily: 'Caveat',
           ),
         ),
@@ -38,166 +41,160 @@ class ChordState extends State<Chords> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(
-                  height: 15,
+                SizedBox(
+                  height: size.mediumBox,
                 ),
-                const Text(
+                Text(
                   'Chords List',
                   style: TextStyle(
                     color: Colors.white,
                     fontFamily: 'Caveat',
-                    fontSize: 64,
+                    fontSize: size.chordFont,
                   ),
                 ),
-                const SizedBox(
-                  height: 15,
-                ),
-                TextButton(
-                  style: buttonStyle(),
-                  onPressed: () {
-                    chordsIndex = -1;
-                    setState(() {});
-                  },
-                  child: Text(
-                    "Reveal All",
-                    style: buttonText(),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      TextButton(
-                        style: buttonStyle(),
-                        onPressed: () {
-                          chordsIndex = 0;
-                          setState(() {});
-                        },
-                        child: Text(
-                          "C",
-                          style: buttonText(),
-                        ),
-                      ),
-                      TextButton(
-                        style: buttonStyle(),
-                        onPressed: () {
-                          chordsIndex = 1;
-                          setState(() {});
-                        },
-                        child: Text(
-                          "D",
-                          style: buttonText(),
-                        ),
-                      ),
-                      TextButton(
-                        style: buttonStyle(),
-                        onPressed: () {
-                          chordsIndex = 2;
-                          setState(() {});
-                        },
-                        child: Text(
-                          "E",
-                          style: buttonText(),
-                        ),
-                      ),
-                      TextButton(
-                        style: buttonStyle(),
-                        onPressed: () {
-                          chordsIndex = 3;
-                          setState(() {});
-                        },
-                        child: Text(
-                          "F",
-                          style: buttonText(),
-                        ),
-                      ),
-                      TextButton(
-                        style: buttonStyle(),
-                        onPressed: () {
-                          chordsIndex = 4;
-                          setState(() {});
-                        },
-                        child: Text(
-                          "G",
-                          style: buttonText(),
-                        ),
-                      ),
-                      TextButton(
-                        style: buttonStyle(),
-                        onPressed: () {
-                          chordsIndex = 5;
-                          setState(() {});
-                        },
-                        child: Text(
-                          "A",
-                          style: buttonText(),
-                        ),
-                      ),
-                      TextButton(
-                        style: buttonStyle(),
-                        onPressed: () {
-                          chordsIndex = 6;
-                          setState(() {});
-                        },
-                        child: Text(
-                          "B",
-                          style: buttonText(),
-                        ),
-                      ),
-                    ]),
-                const SizedBox(
-                  height: 10,
+                SizedBox(
+                  height: size.smallBox,
                 ),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      TextButton(
-                        style: buttonStyle(),
-                        onPressed: () {
-                          tuneIndex = 0;
-                          setState(() {});
-                        },
-                        child: Text(
-                          "Flat",
-                          style: buttonText(),
+                      SizedBox(
+                        width: size.dropWidth,
+                        height: size.dropHeight,
+                        child: Center(
+                          child: DropdownButton<int>(
+                            hint: Text(
+                              chordsIndex == -1
+                                  ? 'All Chords'
+                                  : showChords[chordsIndex].toUpperCase(),
+                              style: TextStyle(
+                                fontSize: size.buttonFont,
+                                color: Colors.white,
+                              ),
+                            ),
+                            onChanged: (int? value) {
+                              chordsIndex = value!;
+                              setState(() {});
+                            },
+                            items: <DropdownMenuItem<int>>[
+                              DropdownMenuItem<int>(
+                                value: -1,
+                                child: Text('All',
+                                    style:
+                                        TextStyle(fontSize: size.buttonFont)),
+                              ),
+                              DropdownMenuItem<int>(
+                                value: 0,
+                                child: Text('C',
+                                    style:
+                                        TextStyle(fontSize: size.buttonFont)),
+                              ),
+                              DropdownMenuItem<int>(
+                                value: 1,
+                                child: Text('D',
+                                    style:
+                                        TextStyle(fontSize: size.buttonFont)),
+                              ),
+                              DropdownMenuItem<int>(
+                                value: 2,
+                                child: Text('E',
+                                    style:
+                                        TextStyle(fontSize: size.buttonFont)),
+                              ),
+                              DropdownMenuItem<int>(
+                                value: 3,
+                                child: Text('F',
+                                    style:
+                                        TextStyle(fontSize: size.buttonFont)),
+                              ),
+                              DropdownMenuItem<int>(
+                                value: 4,
+                                child: Text('G',
+                                    style:
+                                        TextStyle(fontSize: size.buttonFont)),
+                              ),
+                              DropdownMenuItem<int>(
+                                value: 5,
+                                child: Text('A',
+                                    style:
+                                        TextStyle(fontSize: size.buttonFont)),
+                              ),
+                              DropdownMenuItem<int>(
+                                value: 6,
+                                child: Text('B',
+                                    style:
+                                        TextStyle(fontSize: size.buttonFont)),
+                              ),
+                            ],
+                            borderRadius: BorderRadius.circular(15),
+                            padding: EdgeInsets.zero,
+                            dropdownColor:
+                                const Color.fromARGB(255, 228, 228, 228),
+                          ),
                         ),
                       ),
-                      TextButton(
-                        style: buttonStyle(),
-                        onPressed: () {
-                          tuneIndex = 1;
-                          setState(() {});
-                        },
-                        child: Text(
-                          "Neutral",
-                          style: buttonText(),
-                        ),
-                      ),
-                      TextButton(
-                        style: buttonStyle(),
-                        onPressed: () {
-                          tuneIndex = 2;
-                          setState(() {});
-                        },
-                        child: Text(
-                          "Sharp",
-                          style: buttonText(),
+                      SizedBox(
+                        width: size.dropWidth,
+                        height: size.dropHeight,
+                        child: Center(
+                          child: DropdownButton<int>(
+                            hint: Text(
+                              tuneIndex == 2
+                                  ? 'Sharp'
+                                  : tuneIndex == 0
+                                      ? 'Flat'
+                                      : 'Normal',
+                              style: TextStyle(
+                                fontSize: size.buttonFont,
+                                color: Colors.white,
+                              ),
+                            ),
+                            onChanged: (int? value) {
+                              tuneIndex = value!;
+                              setState(() {});
+                            },
+                            elevation: 16,
+                            items: <DropdownMenuItem<int>>[
+                              DropdownMenuItem<int>(
+                                value: 0,
+                                child: Text(
+                                  'Flat',
+                                  style: TextStyle(fontSize: size.buttonFont),
+                                ),
+                              ),
+                              DropdownMenuItem<int>(
+                                value: 1,
+                                child: Text(
+                                  'Normal',
+                                  style: TextStyle(fontSize: size.buttonFont),
+                                ),
+                              ),
+                              DropdownMenuItem<int>(
+                                value: 2,
+                                child: Text(
+                                  'Sharp',
+                                  style: TextStyle(fontSize: size.buttonFont),
+                                ),
+                              ),
+                            ],
+                            borderRadius: BorderRadius.circular(15),
+                            padding: EdgeInsets.zero,
+                            dropdownColor:
+                                const Color.fromARGB(255, 228, 228, 228),
+                          ),
                         ),
                       ),
                     ]),
-                const SizedBox(
-                  height: 25,
+                SizedBox(
+                  height: size.largeBox,
                 ),
               ],
             ),
             Builder(
               builder: (context) {
                 double screenWidth = MediaQuery.of(context).size.width;
-                int itemsPerRow = (screenWidth / 200).floor();
+                int itemsPerRow = (screenWidth / size.chordWidth).floor();
 
                 return Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -237,7 +234,7 @@ class ChordState extends State<Chords> {
 List<Widget> getOneLetter() {
   // Set Equivalent note names (i.e. B# to C)
   if (chordsIndex == 0 && tuneIndex == 0) {
-    chordsIndex = 1;
+    chordsIndex = 6;
     tuneIndex = 1;
   } else if (chordsIndex == 2 && tuneIndex == 2) {
     chordsIndex = 3;

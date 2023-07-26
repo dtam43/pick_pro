@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'main.dart';
+import '/src/drawer.dart';
+import '/src/styles.dart';
+import '/src/error_popup.dart';
 import 'dart:ui' as ui;
 
 import 'dart:async';
@@ -13,7 +15,34 @@ Color blueGreen = const Color.fromARGB(255, 121, 207, 175);
 enum MetronomeIs { playing, stopped, stopping }
 
 final TextEditingController _controller = TextEditingController();
-late AudioPlayer player;
+
+// Singleton to retain metronome information after leaving page
+class MetronomePlayer {
+  MetronomeIs metronomeIs = MetronomeIs.stopped;
+
+  // Audio player and timers for animation and sounds
+  AudioPlayer player = AudioPlayer();
+  Timer timer = Timer.periodic(const Duration(milliseconds: 0), (Timer t) {});
+  Timer frameTimer =
+      Timer.periodic(const Duration(milliseconds: 0), (Timer t) {});
+  int bpm = 100;
+
+  bool bobPanning = false;
+
+  // Preventing BPM editing during metronome playback
+  bool isLocked = false;
+
+  // Variables for animation
+  int lastFrameTime = 0;
+  int lastEvenTick = 0;
+  bool lastTickWasEven = true;
+  int interval = 0;
+
+  double angle = 0;
+
+  MetronomePlayer._internal();
+  static final MetronomePlayer _instance = MetronomePlayer._internal();
+}
 
 class Metronome extends StatefulWidget {
   @override
@@ -26,29 +55,13 @@ class MetronomeState extends State<Metronome> {
   final _minTempo = 20;
   final _maxTempo = 240;
 
-  int _bpm = 100;
-  bool _bobPanning = false;
-
-  // Preventing BPM editing during metronome playback
-  bool _isLocked = false;
-
-  // Variables for animation
-  MetronomeIs _metronomeIs = MetronomeIs.stopped;
-  int _lastFrameTime = 0;
-  Timer _timer = Timer.periodic(const Duration(milliseconds: 0), (Timer t) {});
-  Timer _frameTimer =
-      Timer.periodic(const Duration(milliseconds: 0), (Timer t) {});
-  int _lastEvenTick = 0;
-  bool _lastTickWasEven = true;
-  int _interval = 0;
-
-  double _angle = 0;
+  // Singleton to hold metronome-related variables
+  final _metronomePlayer = MetronomePlayer._instance;
 
   // Cancel timers when leaving page
   @override
   void dispose() {
-    _timer.cancel();
-    _frameTimer.cancel();
+    _metronomePlayer.frameTimer.cancel();
     super.dispose();
   }
 
@@ -56,51 +69,62 @@ class MetronomeState extends State<Metronome> {
   @override
   void initState() {
     super.initState();
-    player = AudioPlayer();
-    player.setAsset('assets/sounds/metronome.mp3');
+
+    // If metronome is previously playing, restart animation
+    if (_metronomePlayer.metronomeIs == MetronomeIs.playing) {
+      _metronomePlayer.lastEvenTick = DateTime.now().millisecondsSinceEpoch;
+      _animate();
+      _metronomePlayer.isLocked = true;
+    }
+
+    _metronomePlayer.player.setAsset('assets/sounds/metronome.mp3');
   }
 
   // Method to start the metronome animation
   void _start() {
-    _metronomeIs = MetronomeIs.playing;
-    _interval = 1000 ~/ (_bpm / 60);
+    _metronomePlayer.metronomeIs = MetronomeIs.playing;
+    _metronomePlayer.interval = 1000 ~/ (_metronomePlayer.bpm / 60);
 
-    _lastEvenTick = DateTime.now().millisecondsSinceEpoch;
+    _metronomePlayer.lastEvenTick = DateTime.now().millisecondsSinceEpoch;
 
-    _timer = Timer.periodic(Duration(milliseconds: _interval), _onTick);
+    _metronomePlayer.timer = Timer.periodic(
+        Duration(milliseconds: _metronomePlayer.interval), _onTick);
     _animate();
 
     // Play first metronome sound
-    player.pause();
-    player.seek(Duration.zero);
-    player.play();
+    _metronomePlayer.player.pause();
+    _metronomePlayer.player.seek(Duration.zero);
+    _metronomePlayer.player.play();
 
     // Lock text field
-    _isLocked = true;
+    _metronomePlayer.isLocked = true;
 
     setState(() {});
   }
 
   // Method to create the animation delay and timer
   void _animate() {
-    _frameTimer.cancel();
+    _metronomePlayer.frameTimer.cancel();
 
     int frameTime = DateTime.now().millisecondsSinceEpoch;
 
-    if (_metronomeIs == MetronomeIs.playing ||
-        _metronomeIs == MetronomeIs.stopping) {
-      int delay =
-          max(0, _lastFrameTime + 17 - DateTime.now().millisecondsSinceEpoch);
+    if (_metronomePlayer.metronomeIs == MetronomeIs.playing ||
+        _metronomePlayer.metronomeIs == MetronomeIs.stopping) {
+      int delay = max(
+          0,
+          _metronomePlayer.lastFrameTime +
+              17 -
+              DateTime.now().millisecondsSinceEpoch);
 
       // Set timer for animation
-      _frameTimer = Timer(Duration(milliseconds: delay), () {
+      _metronomePlayer.frameTimer = Timer(Duration(milliseconds: delay), () {
         _animate();
       });
     } else {
-      _angle = 0;
+      _metronomePlayer.angle = 0;
     }
 
-    _lastFrameTime = frameTime;
+    _metronomePlayer.lastFrameTime = frameTime;
 
     setState(() {});
   }
@@ -108,42 +132,43 @@ class MetronomeState extends State<Metronome> {
   // Method to play metronome sound on tick or cancel timer when stop is pressed
   void _onTick(Timer t) {
     // Tracking length since tick passed every other tick
-    _lastTickWasEven = t.tick % 2 == 0;
-    if (_lastTickWasEven) _lastEvenTick = DateTime.now().millisecondsSinceEpoch;
+    _metronomePlayer.lastTickWasEven = t.tick % 2 == 0;
+    if (_metronomePlayer.lastTickWasEven)
+      _metronomePlayer.lastEvenTick = DateTime.now().millisecondsSinceEpoch;
 
     // Playing sound
-    if (_metronomeIs == MetronomeIs.playing) {
-      player.pause();
-      player.seek(Duration.zero);
-      player.play();
+    if (_metronomePlayer.metronomeIs == MetronomeIs.playing) {
+      _metronomePlayer.player.pause();
+      _metronomePlayer.player.seek(Duration.zero);
+      _metronomePlayer.player.play();
 
       // Restting metronome to bring it to a stop
-    } else if (_metronomeIs == MetronomeIs.stopping) {
-      _timer.cancel();
-      _frameTimer.cancel();
+    } else if (_metronomePlayer.metronomeIs == MetronomeIs.stopping) {
+      _metronomePlayer.timer.cancel();
+      _metronomePlayer.frameTimer.cancel();
       _resetAnimation();
-      _isLocked = false;
-      _metronomeIs = MetronomeIs.stopped;
+      _metronomePlayer.isLocked = false;
+      _metronomePlayer.metronomeIs = MetronomeIs.stopped;
       setState(() {});
     }
   }
 
   // Method to signal _onTick to stop
   void _stop() {
-    if (_metronomeIs == MetronomeIs.playing) {
-      _metronomeIs = MetronomeIs.stopping;
+    if (_metronomePlayer.metronomeIs == MetronomeIs.playing) {
+      _metronomePlayer.metronomeIs = MetronomeIs.stopping;
     }
-    player.stop();
+    _metronomePlayer.player.stop();
 
     setState(() {});
   }
 
   // Method to reset animation values
   void _resetAnimation() {
-    _metronomeIs = MetronomeIs.stopped;
-    _lastFrameTime = 0;
-    _lastEvenTick = 0;
-    _lastTickWasEven = true;
+    _metronomePlayer.metronomeIs = MetronomeIs.stopped;
+    _metronomePlayer.lastFrameTime = 0;
+    _metronomePlayer.lastEvenTick = 0;
+    _metronomePlayer.lastTickWasEven = true;
   }
 
   // Method to get rotation angle of the pendulum
@@ -157,16 +182,16 @@ class MetronomeState extends State<Metronome> {
     int now = DateTime.now().millisecondsSinceEpoch;
     double rotatePercent = 0;
 
-    if (_metronomeIs == MetronomeIs.playing ||
-        _metronomeIs == MetronomeIs.stopping) {
-      int timePassed = now - _lastEvenTick;
+    if (_metronomePlayer.metronomeIs == MetronomeIs.playing ||
+        _metronomePlayer.metronomeIs == MetronomeIs.stopping) {
+      int timePassed = now - _metronomePlayer.lastEvenTick;
 
       // Reset time interval if tick animation is delayed
-      if (timePassed > _interval * 2) {
-        timePassed -= (_interval * 2);
+      if (timePassed > _metronomePlayer.interval * 2) {
+        timePassed -= (_metronomePlayer.interval * 2);
       }
 
-      rotatePercent = (timePassed).toDouble() / (_interval * 2);
+      rotatePercent = (timePassed).toDouble() / (_metronomePlayer.interval * 2);
 
       // Restricting rotation in case of extreme intervals
       if (rotatePercent < 0 || rotatePercent > 1) {
@@ -212,7 +237,7 @@ class MetronomeState extends State<Metronome> {
         throw Error();
       }
 
-      _bpm = number;
+      _metronomePlayer.bpm = number;
       setState(() {});
 
       // For invalid BPM inputs
@@ -223,14 +248,15 @@ class MetronomeState extends State<Metronome> {
 
   @override
   Widget build(BuildContext context) {
-    _angle = _getAngle();
+    _metronomePlayer.angle = _getAngle();
+    SizeManager size = SizeManager(context);
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text(
+          title: Text(
             'PickPro',
             style: TextStyle(
-              fontSize: 32.0,
+              fontSize: size.barFont,
               fontFamily: 'Caveat',
             ),
           ),
@@ -248,26 +274,26 @@ class MetronomeState extends State<Metronome> {
                   Image.asset(
                     'assets/images/metronome.png',
                     fit: BoxFit.fill,
-                    width: 400,
-                    height: 500,
+                    width: size.metronomeWidth,
+                    height: size.metronomeHeight,
                   ),
                   Column(mainAxisAlignment: MainAxisAlignment.start, children: [
                     SizedBox(
-                      width: 30.0,
-                      height: 15.0,
+                      width: size.bpmWidth,
+                      height: size.bpmHeight,
                       child: TextField(
                         textAlign: TextAlign.center,
                         controller: _controller,
                         keyboardType: TextInputType.number,
-                        enabled: !_isLocked,
+                        enabled: !_metronomePlayer.isLocked,
                         style: TextStyle(
                           color: blueGreen,
-                          fontSize: 14.0,
+                          fontSize: size.buttonFont,
                         ),
                         decoration: InputDecoration(
-                            hintText: _bpm.toString(),
-                            hintStyle:
-                                TextStyle(color: blueGreen, fontSize: 14),
+                            hintText: _metronomePlayer.bpm.toString(),
+                            hintStyle: TextStyle(
+                                color: blueGreen, fontSize: size.buttonFont),
                             alignLabelWithHint: true,
                             filled: true,
                             fillColor: Colors.transparent,
@@ -283,21 +309,24 @@ class MetronomeState extends State<Metronome> {
                       ),
                     ),
                     LayoutBuilder(builder: (context, constraints) {
-                      return _stick(context, 200.0, 375.0);
+                      return _stick(context, size.stickWidth, size.stickHeight);
                     }),
                   ]),
                 ]),
                 TextButton(
                   style: buttonStyle(),
-                  onPressed: _metronomeIs == MetronomeIs.stopping
+                  onPressed: _metronomePlayer.metronomeIs ==
+                          MetronomeIs.stopping
                       ? null
                       : () {
-                          _metronomeIs == MetronomeIs.stopped
+                          _metronomePlayer.metronomeIs == MetronomeIs.stopped
                               ? _start()
                               : _stop();
                         },
                   child: Text(
-                    _metronomeIs == MetronomeIs.stopped ? 'Play' : 'Stop',
+                    _metronomePlayer.metronomeIs == MetronomeIs.stopped
+                        ? 'Play'
+                        : 'Stop',
                     style: buttonText(),
                   ),
                 ),
@@ -324,12 +353,13 @@ class MetronomeState extends State<Metronome> {
           RenderBox box = context.findRenderObject() as RenderBox;
           Offset localPosition =
               box.globalToLocal(dragDownDetails.globalPosition);
-          if (_weightTapTest(width, height, localPosition)) _bobPanning = true;
+          if (_weightTapTest(width, height, localPosition))
+            _metronomePlayer.bobPanning = true;
         },
 
         // When weight is moved
         onPanUpdate: (dragUpdateDetails) {
-          if (_bobPanning) {
+          if (_metronomePlayer.bobPanning) {
             RenderBox box = context.findRenderObject() as RenderBox;
             Offset localPosition =
                 box.globalToLocal(dragUpdateDetails.globalPosition);
@@ -339,10 +369,10 @@ class MetronomeState extends State<Metronome> {
           }
         },
         onPanEnd: (dragEndDetails) {
-          _bobPanning = false;
+          _metronomePlayer.bobPanning = false;
         },
         onPanCancel: () {
-          _bobPanning = false;
+          _metronomePlayer.bobPanning = false;
         },
 
         // Draw metronome
@@ -350,10 +380,10 @@ class MetronomeState extends State<Metronome> {
           foregroundPainter: MetronomePainter(
               width: width,
               height: height,
-              bpm: _bpm,
+              bpm: _metronomePlayer.bpm,
               minTempo: _minTempo,
               maxTempo: _maxTempo,
-              angle: _angle),
+              angle: _metronomePlayer.angle),
           child: const InkWell(),
         ),
       ),
@@ -362,13 +392,13 @@ class MetronomeState extends State<Metronome> {
 
   // Method to test if the weight has been tapped
   bool _weightTapTest(double width, double height, Offset localPosition) {
-    if (_metronomeIs != MetronomeIs.stopped) return false;
+    if (_metronomePlayer.metronomeIs != MetronomeIs.stopped) return false;
 
     // Compare local position to the previous stored weight coordinates
     Offset translatedLocalPos =
         localPosition.translate(-width / 2, -height * 0.75);
-    PendulumCoords pendulumCoords =
-        PendulumCoords(width, height, _bpm, _minTempo, _maxTempo);
+    PendulumCoords pendulumCoords = PendulumCoords(
+        width, height, _metronomePlayer.bpm, _minTempo, _maxTempo);
 
     return ((translatedLocalPos.dy - pendulumCoords.bobCenter.dy).abs() <
         height / 20);
@@ -378,19 +408,19 @@ class MetronomeState extends State<Metronome> {
   void _weightDragged(double width, double height, Offset localPosition) {
     Offset translatedLocalPos =
         localPosition.translate(-width / 2, -height * 0.75);
-    PendulumCoords pendulumCoords =
-        PendulumCoords(width, height, _bpm, _minTempo, _maxTempo);
+    PendulumCoords pendulumCoords = PendulumCoords(
+        width, height, _metronomePlayer.bpm, _minTempo, _maxTempo);
 
     double weightPos = (translatedLocalPos.dy - pendulumCoords.bobMinY) /
         pendulumCoords.bobTravel;
 
     // Determine new bpm based on relative weight position
-    _bpm = min(
+    _metronomePlayer.bpm = min(
         _maxTempo,
         max(_minTempo,
             _minTempo + (weightPos * (_maxTempo - _minTempo)).toInt()));
 
-    _interval = 1000 ~/ (_bpm / 60);
+    _metronomePlayer.interval = 1000 ~/ (_metronomePlayer.bpm / 60);
     setState(() {});
   }
 }
@@ -533,57 +563,5 @@ class MetronomePainter extends CustomPainter {
   bool shouldRepaint(MetronomePainter oldDelegate) {
     // Repaint if rotation angle or bpm changes
     return (oldDelegate.angle != angle || oldDelegate.bpm != bpm);
-  }
-}
-
-// Overlay Popup to display in case of errors
-class ErrorPopup {
-  static void show(BuildContext context, String message) {
-    OverlayEntry overlayEntry;
-    overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        top: MediaQuery.of(context).size.height * 0.4,
-        width: MediaQuery.of(context).size.width,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            alignment: Alignment.center,
-            child: AnimatedOpacity(
-              duration: const Duration(seconds: 1),
-              opacity: 1.0,
-              child: Center(
-                child: Container(
-                  width: 200,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: blueGreen.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        message,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    Overlay.of(context).insert(overlayEntry);
-
-    Future.delayed(const Duration(seconds: 1)).then((value) {
-      overlayEntry.remove();
-    });
   }
 }

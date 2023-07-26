@@ -1,18 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:pick_pro/main.dart';
-import 'package:pick_pro/metronome.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'dart:io';
+
+import '/src/drawer.dart';
+import '/src/styles.dart';
+import '/src/error_popup.dart';
 
 const Color darkBlue = Color(0xFF000c24);
 const Color blueGreen = Color.fromARGB(255, 121, 207, 175);
 
 final TextEditingController _controller = TextEditingController();
 final TextEditingController _speedController = TextEditingController();
-final TextEditingController _hintController = TextEditingController();
+
+// Singleton to retain information about the audio player
+class PlayerInfo {
+  AudioPlayer player = AudioPlayer();
+  Duration songLength = const Duration(seconds: 12);
+  Duration currentTime = Duration.zero;
+  double playbackSpeed = -1; // Is changed to 1 on initial run
+  bool isPlaying = false;
+  String assetPath = 'sounds/demoSong.mp3';
+  int bpm = 100;
+
+  Metadata metaData =
+      const Metadata(trackName: 'Demo Song', trackArtistNames: ['David Tam']);
+
+  PlayerInfo._internal();
+  static final PlayerInfo _instance = PlayerInfo._internal();
+}
 
 class Playback extends StatefulWidget {
   @override
@@ -20,22 +39,10 @@ class Playback extends StatefulWidget {
 }
 
 class PlaybackState extends State<Playback> {
-  final player = AudioPlayer();
-
-  Metadata metaData = Metadata(
-      trackName: 'Demo Song',
-      trackArtistNames: ['David Tam'],
-      albumArt: Uint8List(128));
-  late Duration songLength;
-  Duration currentTime = Duration.zero;
-  double playbackSpeed = 1;
-  String assetPath = 'sounds/demoSong.mp3';
-  bool isPlaying = false;
-  int bpm = 100;
+  final _playerInfo = PlayerInfo._instance;
 
   @override
   void dispose() {
-    player.stop();
     super.dispose();
   }
 
@@ -43,33 +50,32 @@ class PlaybackState extends State<Playback> {
   void initState() {
     super.initState();
 
-    player.setReleaseMode(ReleaseMode.stop);
+    // These actions occur only on the first load
+    if (_playerInfo.playbackSpeed == -1) {
+      _playerInfo.playbackSpeed = 1;
 
-    player.setSourceAsset(assetPath);
-
-    // Set defualt song
-    player.setSource(AssetSource(assetPath));
-    songLength = const Duration(seconds: 259);
-
-    loadMetaData(File(assetPath));
+      // Set default song
+      _playerInfo.player.setReleaseMode(ReleaseMode.stop);
+      _playerInfo.player.setSource(AssetSource(_playerInfo.assetPath));
+    }
 
     // Listeners for changes in player states
-    player.onPlayerStateChanged.listen((state) {
+    _playerInfo.player.onPlayerStateChanged.listen((state) {
       setState(() {
-        isPlaying = state == PlayerState.playing;
+        _playerInfo.isPlaying = state == PlayerState.playing;
       });
     });
 
-    player.onDurationChanged.listen((newSongLength) {
+    _playerInfo.player.onDurationChanged.listen((newSongLength) {
       setState(() {
-        songLength = newSongLength;
+        _playerInfo.songLength = newSongLength;
       });
     });
 
-    player.onPositionChanged.listen((newCurrentTime) {
+    _playerInfo.player.onPositionChanged.listen((newCurrentTime) {
       setState(() {
-        if (isPlaying) {
-          currentTime = newCurrentTime;
+        if (_playerInfo.isPlaying) {
+          _playerInfo.currentTime = newCurrentTime;
         }
       });
     });
@@ -78,27 +84,43 @@ class PlaybackState extends State<Playback> {
   // Load file from device and set audio player source
   void loadFile(FilePickerResult result) async {
     File file = File(result.files.first.path!.toString());
-    player.setSource(DeviceFileSource(file.path));
+    _playerInfo.player.setSource(DeviceFileSource(file.path));
 
     // Gather metadata from mp3
-    loadMetaData(file);
-  }
-
-  // Loading meta data from mp3
-  void loadMetaData(File file) async {
-    metaData = await MetadataRetriever.fromFile(file);
+    _playerInfo.metaData = await MetadataRetriever.fromFile(file);
   }
 
   @override
   Widget build(BuildContext context) {
+    SizeManager size = SizeManager(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'PickPro',
-          style: TextStyle(
-            fontSize: 32.0,
-            fontFamily: 'Caveat',
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const SizedBox(width: 0, height: 0),
+            Text(
+              'PickPro',
+              style: TextStyle(
+                fontSize: size.barFont,
+                fontFamily: 'Caveat',
+              ),
+            ),
+            IconButton(
+                onPressed: () async {
+                  final result = await FilePicker.platform.pickFiles(
+                      type: FileType.custom, allowedExtensions: ['mp3']);
+
+                  // Load file if a proper file is chosen
+                  if (result != null) {
+                    loadFile(result);
+                  }
+
+                  setState(() {});
+                },
+                icon: const Icon(LucideIcons.copyPlus, size: 25)),
+          ],
         ),
         centerTitle: true,
         backgroundColor: blueGreen,
@@ -108,245 +130,123 @@ class PlaybackState extends State<Playback> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            TextButton(
-              style: buttonStyle(),
-              // Open file picking menu
-              onPressed: () async {
-                final result = await FilePicker.platform.pickFiles(
-                    type: FileType.custom, allowedExtensions: ['mp3']);
-
-                // Load file if a proper file is chosen
-                if (result != null) {
-                  loadFile(result);
-                }
-
-                setState(() {});
-              },
-              child: Text(
-                "Import Media",
-                style: buttonText(),
-              ),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            Image.memory(metaData.albumArt!, height: 256, width: 256),
-            const SizedBox(height: 5),
-            Text('${metaData.trackName}', style: buttonText()),
+            // Load image info from metadata or load default image
+            _playerInfo.metaData.albumArt != null
+                ? Image.memory(_playerInfo.metaData.albumArt!,
+                    height: size.imageSize, width: size.imageSize)
+                : Image.asset('assets/images/logo.png',
+                    height: size.imageSize, width: size.imageSize),
+            SizedBox(height: size.smallBox),
+            Text('${_playerInfo.metaData.trackName}', style: buttonText()),
             Text(
-                '${metaData.trackArtistNames.toString().substring(1, metaData.trackArtistNames.toString().length - 1)}',
+                _playerInfo.metaData.trackArtistNames.toString().substring(
+                    1,
+                    _playerInfo.metaData.trackArtistNames.toString().length -
+                        1),
                 style: buttonText()),
-            const SizedBox(height: 5),
+            SizedBox(height: size.smallBox),
             Slider(
                 min: 0,
-                max: songLength.inSeconds.toDouble(),
-                value: currentTime.inSeconds.toDouble(),
+                max: _playerInfo.songLength.inSeconds.toDouble(),
+                value: _playerInfo.currentTime.inSeconds.toDouble(),
                 onChanged: (value) {
-                  currentTime = Duration(seconds: value.toInt());
+                  _playerInfo.currentTime = Duration(seconds: value.toInt());
                   setState(() {
-                    player.pause();
-                    player.seek(currentTime);
+                    _playerInfo.player.pause();
+                    _playerInfo.player.seek(_playerInfo.currentTime);
                   });
                 }),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    formatTime(currentTime),
+                    formatTime(_playerInfo.currentTime),
                     style: buttonText(),
                   ),
                   Text(
-                    formatTime(songLength),
+                    formatTime(_playerInfo.songLength),
                     style: buttonText(),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                TextButton(
-                  child: Text('-10', style: buttonText()),
-                  style: buttonStyle(),
+                const SizedBox(width: 25),
+                IconButton(
+                  icon: Icon(LucideIcons.rewind,
+                      size: size.iconSize, color: Colors.white),
                   onPressed: () {
-                    currentTime = currentTime - Duration(seconds: 10);
-                    if (currentTime.inSeconds < 0) currentTime = Duration.zero;
-                    player.seek(currentTime);
+                    _playerInfo.currentTime =
+                        _playerInfo.currentTime - const Duration(seconds: 10);
+                    if (_playerInfo.currentTime.inSeconds < 0) {
+                      _playerInfo.currentTime = Duration.zero;
+                    }
+                    _playerInfo.player.seek(_playerInfo.currentTime);
                   },
                 ),
                 IconButton(
-                  icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow,
+                  icon: Icon(
+                      _playerInfo.isPlaying
+                          ? LucideIcons.pause
+                          : LucideIcons.play,
                       color: Colors.white),
-                  iconSize: 50,
+                  iconSize: size.iconSize,
                   onPressed: () {
-                    if (isPlaying) {
+                    if (_playerInfo.isPlaying) {
                       setState(() {
-                        player.pause();
+                        _playerInfo.player.pause();
                       });
                     } else {
                       setState(() {
-                        player.resume();
-                        print(formatTime(currentTime));
+                        _playerInfo.player.resume();
                       });
                     }
                   },
                 ),
-                TextButton(
-                  child: Text('+10', style: buttonText()),
-                  style: buttonStyle(),
+                IconButton(
+                  icon: Icon(LucideIcons.fastForward,
+                      size: size.iconSize, color: Colors.white),
                   onPressed: () {
-                    currentTime = currentTime + Duration(seconds: 10);
-                    if (currentTime > songLength) currentTime = songLength;
-                    player.seek(currentTime);
+                    _playerInfo.currentTime =
+                        _playerInfo.currentTime + const Duration(seconds: 10);
+                    if (_playerInfo.currentTime > _playerInfo.songLength) {
+                      _playerInfo.currentTime = _playerInfo.songLength;
+                    }
+                    _playerInfo.player.seek(_playerInfo.currentTime);
                   },
                 ),
+                const SizedBox(width: 25, height: 0),
               ],
             ),
-            const SizedBox(height: 5),
-            Slider(
-                min: 0.5,
-                max: 1.5,
-                value: playbackSpeed,
-                onChanged: (value) {
-                  playbackSpeed = double.parse(value.toStringAsFixed(2));
-                  player.pause();
-                  player.setPlaybackRate(playbackSpeed);
-                  setState(() {});
-                }),
-            Center(
-              child: Text(
-                'Speed: ${playbackSpeed}x',
-                style: buttonText(),
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(
-                        width: 80,
-                        height: 15,
-                        child: TextField(
-                            textAlign: TextAlign.center,
-                            controller: _hintController,
-                            enabled: false,
-                            decoration: const InputDecoration(
-                                hintText: 'Song BPM:',
-                                hintStyle:
-                                    TextStyle(color: blueGreen, fontSize: 14),
-                                filled: true,
-                                fillColor: Colors.transparent,
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                contentPadding: EdgeInsets.zero),
-                            cursorColor: Colors.white,
-                            onSubmitted: (String value) {})),
-                    SizedBox(
-                      width: 60.0,
-                      height: 15.0,
-                      child: TextField(
-                        textAlign: TextAlign.center,
-                        controller: _controller,
-                        keyboardType: TextInputType.number,
-                        style: const TextStyle(
-                          color: blueGreen,
-                          fontSize: 14.0,
-                        ),
-                        decoration: InputDecoration(
-                            hintText: '${bpm}',
-                            hintStyle:
-                                const TextStyle(color: blueGreen, fontSize: 14),
-                            alignLabelWithHint: true,
-                            filled: true,
-                            fillColor: Colors.transparent,
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            contentPadding: EdgeInsets.zero),
-                        cursorColor: Colors.white,
-                        onSubmitted: (String value) {
-                          _controller.clear();
-                          try {
-                            bpm = int.parse(value);
-                            setState(() {});
-                          } catch (e) {
-                            ErrorPopup.show(
-                                context, "The BPM you entered is invalid.");
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                        width: 90,
-                        height: 15,
-                        child: TextField(
-                            textAlign: TextAlign.center,
-                            controller: _hintController,
-                            enabled: false,
-                            decoration: const InputDecoration(
-                                hintText: 'Desired BPM:',
-                                hintStyle:
-                                    TextStyle(color: blueGreen, fontSize: 14),
-                                filled: true,
-                                fillColor: Colors.transparent,
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                contentPadding: EdgeInsets.zero),
-                            cursorColor: Colors.white,
-                            onSubmitted: (String value) {})),
-                    SizedBox(
-                      width: 60.0,
-                      height: 15.0,
-                      child: TextField(
-                        textAlign: TextAlign.center,
-                        controller: _speedController,
-                        keyboardType: TextInputType.number,
-                        style: const TextStyle(
-                          color: blueGreen,
-                          fontSize: 14.0,
-                        ),
-                        decoration: InputDecoration(
-                            hintText: '${bpm * playbackSpeed}',
-                            hintStyle:
-                                TextStyle(color: blueGreen, fontSize: 14),
-                            alignLabelWithHint: true,
-                            filled: true,
-                            fillColor: Colors.transparent,
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            contentPadding: EdgeInsets.zero),
-                        cursorColor: Colors.white,
-                        onSubmitted: (String value) {
-                          _controller.clear();
-                          try {
-                            int newBPM = int.parse(value);
-                            playbackSpeed =
-                                double.parse((newBPM / bpm).toStringAsFixed(2));
-                            player.pause();
-                            player.setPlaybackRate(playbackSpeed);
-                            setState(() {});
-                          } catch (e) {
-                            ErrorPopup.show(
-                                context, "The BPM you entered is invalid.");
-                          }
-                        },
-                      ),
+                    SizedBox(height: size.mediumBox),
+                    Slider(
+                        min: 0.5,
+                        max: 1.5,
+                        value: _playerInfo.playbackSpeed,
+                        onChanged: (value) {
+                          _playerInfo.playbackSpeed =
+                              double.parse(value.toStringAsFixed(2));
+                          _playerInfo.player.pause();
+                          _playerInfo.player
+                              .setPlaybackRate(_playerInfo.playbackSpeed);
+                          setState(() {});
+                        }),
+                    Text(
+                      'Speed: ${_playerInfo.playbackSpeed}x',
+                      style: buttonText(),
                     ),
                   ],
                 ),
