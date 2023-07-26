@@ -16,7 +16,7 @@ PickPro has 3 main functionalities:
 These features can all be accessed simultaneously, meaning you can overlay the metronome over your songs or reference chords as the song is playing.
 
 ## App Screenshots
-*As the app is still in development, the design of these pages is subject to change.*
+*As the app is still in development, the designs of these pages are subject to change.*
 
 > Metronome
 
