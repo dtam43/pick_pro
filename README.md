@@ -22,7 +22,7 @@ These features can all be accessed simultaneously, meaning you can overlay the m
 
 <img src="pick_pro/assets/images/demo/metronome_page.gif" height="400" alt="metronome"/>
 
-*Users can customize the BPM by either using the text field or by sliding the weight on the wand.*
+*Users can customize the BPM by either using the text field or sliding the weight on the wand.*
 
 > Chords Reference
 
