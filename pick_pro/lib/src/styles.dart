@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 const Color darkBlue = Color(0xFF000c24);
 const Color blueGreen = Color.fromARGB(255, 121, 207, 175);
+const Color background = Color.fromARGB(255, 9, 11, 16);
+const Color foreground = Color.fromARGB(255, 0, 84, 181);
+const Color titleColour = Color.fromARGB(255, 31, 64, 121);
 
 class SizeManager {
   double width = 411;
@@ -17,14 +20,21 @@ class SizeManager {
   setVariables(double width, double height) {
     // Portrait Mode
     if (width < height) {
-      barFont = width / 12.8;
+      titlePadding = width / 10.55;
+      iconSize = (width / 16.44).floorToDouble();
+
+      barFont = width / 15;
       titleFont = width / 6.42;
       logoHeight = height / 1.18;
       logoWidth = logoHeight * 0.417;
 
       buttonFont = width / 29.36;
+      bpmFont = width / 25;
       bpmWidth = width / 11;
-      bpmHeight = height / 40;
+      bpmHeight = height / 35;
+      bpmPaddingT = height / 14.14;
+      bpmPaddingB = height / 7.07;
+      metronomePadding = height / 40;
       metronomeWidth = width / 1;
       metronomeHeight = metronomeWidth * 1.2;
       stickWidth = width / 2.16;
@@ -39,24 +49,33 @@ class SizeManager {
       dropHeight = height / 14.14;
       chordWidth = width / 2.055;
 
-      imageSize = width / 1.60;
-      iconSize = (width / 11.28).floorToDouble();
+      imageSize = width / 1.30;
+      playButtonSize = (width / 15).floorToDouble();
+      songSize = width / 25;
+      artistSize = width / 28;
+      sliderPadding = width / 15.55;
 
       smallBox = height / 70.7;
       mediumBox = height / 47.13;
       largeBox = height / 23.57;
-      landscapeBox = 0;
     } else {
       // Landscape Mode
+      titlePadding = height / 10.55;
+      iconSize = (height / 15).floorToDouble();
+
       barFont = height / 16;
       titleFont = height / 8;
       logoHeight = height / 1.18;
       logoWidth = logoHeight * 0.417;
 
       buttonFont = height / 40;
+      bpmFont = width / 75;
       bpmHeight = height / 20;
       bpmWidth = bpmHeight * 1.5;
-      metronomeHeight = height / 1.57;
+      bpmPaddingT = height / 23;
+      bpmPaddingB = height / 9;
+      metronomePadding = 0;
+      metronomeHeight = height / 1.5;
       metronomeWidth = metronomeHeight / 1.2;
       stickHeight = height / 2.5;
       stickWidth = stickHeight / 1.875;
@@ -70,13 +89,15 @@ class SizeManager {
       dropHeight = height / 14.14;
       chordWidth = width / 4;
 
-      imageSize = height / 2.5;
-      iconSize = (height / 15).floorToDouble();
+      imageSize = height / 2;
+      playButtonSize = (height / 18).floorToDouble();
+      songSize = height / 25;
+      artistSize = height / 28;
+      sliderPadding = height / 15.55;
 
       smallBox = height / 100;
       mediumBox = height / 75;
       largeBox = height / 25;
-      landscapeBox = 20;
     }
   }
 
@@ -86,9 +107,15 @@ class SizeManager {
   late double logoWidth;
   late double logoHeight;
 
+  late double titlePadding;
+
   late double buttonFont;
+  late double bpmFont;
   late double bpmWidth;
   late double bpmHeight;
+  late double bpmPaddingT;
+  late double bpmPaddingB;
+  late double metronomePadding;
   late double metronomeWidth;
   late double metronomeHeight;
   late double stickWidth;
@@ -106,34 +133,54 @@ class SizeManager {
   late double chordRow;
 
   late double imageSize;
+  late double playButtonSize;
   late double iconSize;
+  late double songSize;
+  late double artistSize;
+  late double sliderPadding;
 
   late double smallBox;
   late double mediumBox;
   late double largeBox;
-  late double landscapeBox;
 }
 
 // Preset Styles
-ButtonStyle buttonStyle() {
-  return ButtonStyle(
-    foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-    backgroundColor: MaterialStateProperty.all<Color>(blueGreen),
-    overlayColor: MaterialStateProperty.all<Color>(
-        const Color.fromARGB(255, 47, 147, 122)),
-    padding: MaterialStateProperty.all<EdgeInsets>(
-        const EdgeInsets.symmetric(vertical: 10, horizontal: 20)),
-    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-      RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-    ),
-  );
+TextStyle titleText(double fontSize) {
+  return TextStyle(
+      fontSize: fontSize,
+      color: titleColour,
+      fontFamily: 'Eina01-Regular',
+      fontWeight: FontWeight.bold);
 }
 
-TextStyle buttonText(double fontSize) {
+TextStyle bpmText(double fontSize) {
   return TextStyle(
-    fontSize: fontSize,
-    color: Colors.white,
-  );
+      fontSize: fontSize,
+      color: Colors.white,
+      fontFamily: 'Eina01-Regular',
+      fontWeight: FontWeight.bold);
+}
+
+TextStyle songText(double fontSize) {
+  return TextStyle(
+      fontSize: fontSize,
+      color: Colors.white,
+      fontFamily: 'Eina01-Regular',
+      fontWeight: FontWeight.bold);
+}
+
+TextStyle artistText(double fontSize) {
+  return TextStyle(
+      fontSize: fontSize,
+      color: titleColour,
+      fontFamily: 'Eina01-Regular',
+      fontWeight: FontWeight.normal);
+}
+
+TextStyle timeText(double fontSize) {
+  return TextStyle(
+      fontSize: fontSize,
+      color: Colors.white,
+      fontFamily: 'Eina01-Regular',
+      fontWeight: FontWeight.normal);
 }

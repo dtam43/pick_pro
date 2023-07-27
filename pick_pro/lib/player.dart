@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'dart:io';
 
-import '/src/drawer.dart';
+import '/src/navigation.dart';
 import '/src/styles.dart';
-import '/src/error_popup.dart';
 
-const Color darkBlue = Color(0xFF000c24);
-const Color blueGreen = Color.fromARGB(255, 121, 207, 175);
-
-final TextEditingController _controller = TextEditingController();
-final TextEditingController _speedController = TextEditingController();
+const Color background = Color.fromARGB(255, 9, 11, 16);
+const Color foreground = Color.fromARGB(255, 0, 84, 181);
 
 // Singleton to retain information about the audio player
 class PlayerInfo {
@@ -95,104 +90,131 @@ class PlaybackState extends State<Playback> {
     SizeManager size = SizeManager(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const SizedBox(width: 0, height: 0),
-            Text(
-              'PickPro',
-              style: TextStyle(
-                fontSize: size.barFont,
-                fontFamily: 'Caveat',
-              ),
-            ),
-            IconButton(
-                onPressed: () async {
-                  final result = await FilePicker.platform.pickFiles(
-                      type: FileType.custom, allowedExtensions: ['mp3']);
-
-                  // Load file if a proper file is chosen
-                  if (result != null) {
-                    loadFile(result);
-                  }
-
-                  setState(() {});
-                },
-                icon: const Icon(LucideIcons.copyPlus, size: 25)),
-          ],
-        ),
-        centerTitle: true,
-        backgroundColor: blueGreen,
-      ),
       body: SingleChildScrollView(
         child: ConstrainedBox(
           constraints:
               BoxConstraints(minHeight: MediaQuery.of(context).size.height),
           child: Container(
-            color: darkBlue,
+            color: background,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: size.width < size.height
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.center,
               children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(
+                          left: size.titlePadding, top: size.titlePadding),
+                      child: Text(
+                        'Playback',
+                        style: titleText(size.barFont),
+                      ),
+                    ),
+                    const SizedBox(width: 0, height: 0),
+                    Padding(
+                      padding: EdgeInsets.only(
+                          top: size.titlePadding, right: size.titlePadding),
+                      child: IconButton(
+                          onPressed: () async {
+                            final result = await FilePicker.platform.pickFiles(
+                                type: FileType.custom,
+                                allowedExtensions: ['mp3']);
+
+                            // Load file if a proper file is chosen
+                            if (result != null) {
+                              loadFile(result);
+                            }
+
+                            setState(() {});
+                          },
+                          icon: Icon(
+                            LucideIcons.copyPlus,
+                            size: size.iconSize,
+                            color: foreground,
+                          )),
+                    ),
+                  ],
+                ),
                 // Load image info from metadata or load default image
-                _playerInfo.metaData.albumArt != null
-                    ? Image.memory(_playerInfo.metaData.albumArt!,
-                        height: size.imageSize, width: size.imageSize)
-                    : Image.asset('assets/images/logo.png',
-                        height: size.imageSize, width: size.imageSize),
-                SizedBox(height: size.smallBox),
-                Text('${_playerInfo.metaData.trackName}',
-                    style: buttonText(size.buttonFont)),
-                Text(
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: size.titlePadding,
+                      top: size.smallBox,
+                      bottom: size.smallBox),
+                  child: _playerInfo.metaData.albumArt != null
+                      ? Image.memory(_playerInfo.metaData.albumArt!,
+                          height: size.imageSize, width: size.imageSize)
+                      : Image.asset('assets/images/logo.png',
+                          height: size.imageSize, width: size.imageSize),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: size.titlePadding),
+                  child: Text('${_playerInfo.metaData.trackName}',
+                      style: songText(size.songSize),
+                      textAlign: TextAlign.left),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: size.titlePadding),
+                  child: Text(
                     _playerInfo.metaData.trackArtistNames.toString().substring(
                         1,
                         _playerInfo.metaData.trackArtistNames
                                 .toString()
                                 .length -
                             1),
-                    style: buttonText(size.buttonFont)),
-                SizedBox(height: size.smallBox),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      vertical: 0, horizontal: size.landscapeBox),
-                  child: Slider(
-                      min: 0,
-                      max: _playerInfo.songLength.inSeconds.toDouble(),
-                      value: _playerInfo.currentTime.inSeconds.toDouble(),
-                      onChanged: (value) {
-                        _playerInfo.currentTime =
-                            Duration(seconds: value.toInt());
-                        setState(() {
-                          _playerInfo.player.pause();
-                          _playerInfo.player.seek(_playerInfo.currentTime);
-                        });
-                      }),
+                    style: artistText(size.artistSize),
+                  ),
                 ),
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
+                  padding: EdgeInsets.only(
+                      top: size.smallBox,
+                      left: size.sliderPadding,
+                      right: size.sliderPadding),
+                  child: Slider(
+                    min: 0,
+                    max: _playerInfo.songLength.inSeconds.toDouble(),
+                    value: _playerInfo.currentTime.inSeconds.toDouble(),
+                    onChanged: (value) {
+                      _playerInfo.currentTime =
+                          Duration(seconds: value.toInt());
+                      _playerInfo.player.pause();
+                      _playerInfo.player.seek(_playerInfo.currentTime);
+                      setState(() {});
+                    },
+                    activeColor: foreground,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: size.titlePadding, vertical: 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         formatTime(_playerInfo.currentTime),
-                        style: buttonText(size.buttonFont),
+                        style: timeText(size.artistSize),
                       ),
                       Text(
                         formatTime(_playerInfo.songLength),
-                        style: buttonText(size.buttonFont),
+                        style: timeText(size.artistSize),
                       ),
                     ],
                   ),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(width: 25),
+                    const SizedBox(width: 0, height: 0),
                     IconButton(
-                      icon: Icon(LucideIcons.rewind,
-                          size: size.iconSize, color: Colors.white),
+                      icon: Icon(
+                        LucideIcons.rewind,
+                        size: size.playButtonSize,
+                        color: foreground,
+                      ),
                       onPressed: () {
                         _playerInfo.currentTime = _playerInfo.currentTime -
                             const Duration(seconds: 10);
@@ -207,8 +229,8 @@ class PlaybackState extends State<Playback> {
                           _playerInfo.isPlaying
                               ? LucideIcons.pause
                               : LucideIcons.play,
-                          color: Colors.white),
-                      iconSize: size.iconSize,
+                          color: foreground),
+                      iconSize: size.playButtonSize,
                       onPressed: () {
                         if (_playerInfo.isPlaying) {
                           setState(() {
@@ -223,7 +245,7 @@ class PlaybackState extends State<Playback> {
                     ),
                     IconButton(
                       icon: Icon(LucideIcons.fastForward,
-                          size: size.iconSize, color: Colors.white),
+                          size: size.playButtonSize, color: foreground),
                       onPressed: () {
                         _playerInfo.currentTime = _playerInfo.currentTime +
                             const Duration(seconds: 10);
@@ -233,35 +255,44 @@ class PlaybackState extends State<Playback> {
                         _playerInfo.player.seek(_playerInfo.currentTime);
                       },
                     ),
-                    const SizedBox(width: 25, height: 0),
+                    const SizedBox(width: 0, height: 0),
                   ],
                 ),
-                SizedBox(height: size.landscapeBox),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(height: size.mediumBox),
-                        Slider(
-                            min: 0.5,
-                            max: 1.5,
-                            value: _playerInfo.playbackSpeed,
-                            onChanged: (value) {
-                              _playerInfo.playbackSpeed =
-                                  double.parse(value.toStringAsFixed(2));
-                              _playerInfo.player
-                                  .setPlaybackRate(_playerInfo.playbackSpeed);
-                              setState(() {});
-                            }),
-                        Text(
-                          'Speed: ${_playerInfo.playbackSpeed}x',
-                          style: buttonText(size.buttonFont),
-                        ),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SliderTheme(
+                            data: const SliderThemeData(
+                              thumbShape:
+                                  RoundSliderThumbShape(enabledThumbRadius: 5),
+                            ),
+                            child: Slider(
+                              min: 0.5,
+                              max: 1.5,
+                              value: _playerInfo.playbackSpeed,
+                              onChanged: (value) {
+                                _playerInfo.playbackSpeed =
+                                    double.parse(value.toStringAsFixed(2));
+                                _playerInfo.player
+                                    .setPlaybackRate(_playerInfo.playbackSpeed);
+                                setState(() {});
+                              },
+                              activeColor: foreground,
+                            ),
+                          ),
+                          Text(
+                            'Speed: ${_playerInfo.playbackSpeed}x',
+                            style: timeText(size.buttonFont),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -270,7 +301,7 @@ class PlaybackState extends State<Playback> {
           ),
         ),
       ),
-      drawer: MyDrawer(index: 3),
+      bottomNavigationBar: MyNavBar(index: 2),
     );
   }
 

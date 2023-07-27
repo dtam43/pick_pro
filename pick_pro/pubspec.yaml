@@ -82,6 +82,12 @@ flutter:
    - family: Caveat
      fonts:
        - asset: assets/fonts/Caveat-Regular.ttf
+   - family: Eina01-Bold
+     fonts: 
+       - asset: assets/fonts/Eina01-Bold.ttf
+   - family: Eina01-Regular
+     fonts: 
+       - asset: assets/fonts/Eina01-Regular.ttf  
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

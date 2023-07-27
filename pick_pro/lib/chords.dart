@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '/src/drawer.dart';
+import '/src/navigation.dart';
 import '/src/styles.dart';
 
-const Color darkBlue = Color(0xFF000c24);
-const Color blueGreen = Color.fromARGB(255, 121, 207, 175);
+const Color background = Color.fromARGB(255, 9, 11, 16);
+const Color foreground = Color.fromARGB(255, 0, 84, 181);
 
 // Tracking the chords to show on the screen
 final showChords = <String>['c', 'd', 'e', 'f', 'g', 'a', 'b'];
@@ -22,210 +22,183 @@ class ChordState extends State<Chords> {
     SizeManager size = SizeManager(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'PickPro',
-          style: TextStyle(
-            fontSize: size.barFont,
-            fontFamily: 'Caveat',
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: blueGreen,
-      ),
       body: Container(
-        color: darkBlue,
-        child: Center(
-          child: ListView(children: <Widget>[
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(
-                  height: size.mediumBox,
-                ),
-                Text(
+        color: background,
+        child: ListView(children: <Widget>[
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(
+                    left: size.titlePadding, top: size.titlePadding),
+                child: Text(
                   'Chords List',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Caveat',
-                    fontSize: size.chordFont,
-                  ),
+                  style: titleText(size.barFont),
                 ),
-                SizedBox(
-                  height: size.smallBox,
-                ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      SizedBox(
-                        width: size.dropWidth,
-                        height: size.dropHeight,
-                        child: Center(
-                          child: DropdownButton<int>(
-                            hint: Text(
-                              chordsIndex == -1
-                                  ? 'All Chords'
-                                  : showChords[chordsIndex].toUpperCase(),
-                              style: TextStyle(
-                                fontSize: size.buttonFont,
-                                color: Colors.white,
-                              ),
+              ),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(
+                      width: size.dropWidth,
+                      height: size.dropHeight,
+                      child: Center(
+                        child: DropdownButton<int>(
+                          hint: Text(
+                            chordsIndex == -1
+                                ? 'All Chords'
+                                : showChords[chordsIndex].toUpperCase(),
+                            style: TextStyle(
+                              fontSize: size.buttonFont,
+                              color: Colors.white,
                             ),
-                            onChanged: (int? value) {
-                              chordsIndex = value!;
-                              setState(() {});
-                            },
-                            items: <DropdownMenuItem<int>>[
-                              DropdownMenuItem<int>(
-                                value: -1,
-                                child: Text('All',
-                                    style:
-                                        TextStyle(fontSize: size.buttonFont)),
-                              ),
-                              DropdownMenuItem<int>(
-                                value: 0,
-                                child: Text('C',
-                                    style:
-                                        TextStyle(fontSize: size.buttonFont)),
-                              ),
-                              DropdownMenuItem<int>(
-                                value: 1,
-                                child: Text('D',
-                                    style:
-                                        TextStyle(fontSize: size.buttonFont)),
-                              ),
-                              DropdownMenuItem<int>(
-                                value: 2,
-                                child: Text('E',
-                                    style:
-                                        TextStyle(fontSize: size.buttonFont)),
-                              ),
-                              DropdownMenuItem<int>(
-                                value: 3,
-                                child: Text('F',
-                                    style:
-                                        TextStyle(fontSize: size.buttonFont)),
-                              ),
-                              DropdownMenuItem<int>(
-                                value: 4,
-                                child: Text('G',
-                                    style:
-                                        TextStyle(fontSize: size.buttonFont)),
-                              ),
-                              DropdownMenuItem<int>(
-                                value: 5,
-                                child: Text('A',
-                                    style:
-                                        TextStyle(fontSize: size.buttonFont)),
-                              ),
-                              DropdownMenuItem<int>(
-                                value: 6,
-                                child: Text('B',
-                                    style:
-                                        TextStyle(fontSize: size.buttonFont)),
-                              ),
-                            ],
-                            borderRadius: BorderRadius.circular(15),
-                            padding: EdgeInsets.zero,
-                            dropdownColor:
-                                const Color.fromARGB(255, 228, 228, 228),
                           ),
+                          onChanged: (int? value) {
+                            chordsIndex = value!;
+                            setState(() {});
+                          },
+                          items: <DropdownMenuItem<int>>[
+                            DropdownMenuItem<int>(
+                              value: -1,
+                              child: Text('All',
+                                  style: TextStyle(fontSize: size.buttonFont)),
+                            ),
+                            DropdownMenuItem<int>(
+                              value: 0,
+                              child: Text('C',
+                                  style: TextStyle(fontSize: size.buttonFont)),
+                            ),
+                            DropdownMenuItem<int>(
+                              value: 1,
+                              child: Text('D',
+                                  style: TextStyle(fontSize: size.buttonFont)),
+                            ),
+                            DropdownMenuItem<int>(
+                              value: 2,
+                              child: Text('E',
+                                  style: TextStyle(fontSize: size.buttonFont)),
+                            ),
+                            DropdownMenuItem<int>(
+                              value: 3,
+                              child: Text('F',
+                                  style: TextStyle(fontSize: size.buttonFont)),
+                            ),
+                            DropdownMenuItem<int>(
+                              value: 4,
+                              child: Text('G',
+                                  style: TextStyle(fontSize: size.buttonFont)),
+                            ),
+                            DropdownMenuItem<int>(
+                              value: 5,
+                              child: Text('A',
+                                  style: TextStyle(fontSize: size.buttonFont)),
+                            ),
+                            DropdownMenuItem<int>(
+                              value: 6,
+                              child: Text('B',
+                                  style: TextStyle(fontSize: size.buttonFont)),
+                            ),
+                          ],
+                          borderRadius: BorderRadius.circular(15),
+                          padding: EdgeInsets.zero,
+                          dropdownColor:
+                              const Color.fromARGB(255, 228, 228, 228),
                         ),
                       ),
-                      SizedBox(
-                        width: size.dropWidth,
-                        height: size.dropHeight,
-                        child: Center(
-                          child: DropdownButton<int>(
-                            hint: Text(
-                              tuneIndex == 2
-                                  ? 'Sharp'
-                                  : tuneIndex == 0
-                                      ? 'Flat'
-                                      : 'Normal',
-                              style: TextStyle(
-                                fontSize: size.buttonFont,
-                                color: Colors.white,
+                    ),
+                    SizedBox(
+                      width: size.dropWidth,
+                      height: size.dropHeight,
+                      child: Center(
+                        child: DropdownButton<int>(
+                          hint: Text(
+                            tuneIndex == 2
+                                ? 'Sharp'
+                                : tuneIndex == 0
+                                    ? 'Flat'
+                                    : 'Normal',
+                            style: TextStyle(
+                              fontSize: size.buttonFont,
+                              color: Colors.white,
+                            ),
+                          ),
+                          onChanged: (int? value) {
+                            tuneIndex = value!;
+                            setState(() {});
+                          },
+                          elevation: 16,
+                          items: <DropdownMenuItem<int>>[
+                            DropdownMenuItem<int>(
+                              value: 0,
+                              child: Text(
+                                'Flat',
+                                style: TextStyle(fontSize: size.buttonFont),
                               ),
                             ),
-                            onChanged: (int? value) {
-                              tuneIndex = value!;
-                              setState(() {});
-                            },
-                            elevation: 16,
-                            items: <DropdownMenuItem<int>>[
-                              DropdownMenuItem<int>(
-                                value: 0,
-                                child: Text(
-                                  'Flat',
-                                  style: TextStyle(fontSize: size.buttonFont),
-                                ),
+                            DropdownMenuItem<int>(
+                              value: 1,
+                              child: Text(
+                                'Normal',
+                                style: TextStyle(fontSize: size.buttonFont),
                               ),
-                              DropdownMenuItem<int>(
-                                value: 1,
-                                child: Text(
-                                  'Normal',
-                                  style: TextStyle(fontSize: size.buttonFont),
-                                ),
+                            ),
+                            DropdownMenuItem<int>(
+                              value: 2,
+                              child: Text(
+                                'Sharp',
+                                style: TextStyle(fontSize: size.buttonFont),
                               ),
-                              DropdownMenuItem<int>(
-                                value: 2,
-                                child: Text(
-                                  'Sharp',
-                                  style: TextStyle(fontSize: size.buttonFont),
-                                ),
-                              ),
-                            ],
-                            borderRadius: BorderRadius.circular(15),
-                            padding: EdgeInsets.zero,
-                            dropdownColor:
-                                const Color.fromARGB(255, 228, 228, 228),
-                          ),
+                            ),
+                          ],
+                          borderRadius: BorderRadius.circular(15),
+                          padding: EdgeInsets.zero,
+                          dropdownColor:
+                              const Color.fromARGB(255, 228, 228, 228),
                         ),
                       ),
-                    ]),
-                SizedBox(
-                  height: size.largeBox,
-                ),
-              ],
-            ),
-            Builder(
-              builder: (context) {
-                double screenWidth = MediaQuery.of(context).size.width;
-                int itemsPerRow = (screenWidth / size.chordWidth).floor();
+                    ),
+                  ]),
+              SizedBox(
+                height: size.largeBox,
+              ),
+            ],
+          ),
+          Builder(
+            builder: (context) {
+              double screenWidth = MediaQuery.of(context).size.width;
+              int itemsPerRow = (screenWidth / size.chordWidth).floor();
 
-                return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      const SizedBox(
-                        width: 0,
-                        height: 50,
+              return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const SizedBox(
+                      width: 0,
+                      height: 50,
+                    ),
+                    Flexible(
+                      child: GridView.count(
+                        shrinkWrap: true,
+                        physics: const ScrollPhysics(),
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 10,
+                        crossAxisCount:
+                            itemsPerRow, // Number of items per row based on screenWidth
+                        children:
+                            chordsIndex < 0 ? getAllChords() : getOneLetter(),
                       ),
-                      Flexible(
-                        child: GridView.count(
-                          shrinkWrap: true,
-                          physics: const ScrollPhysics(),
-                          mainAxisSpacing: 10,
-                          crossAxisSpacing: 10,
-                          crossAxisCount:
-                              itemsPerRow, // Number of items per row based on screenWidth
-                          children:
-                              chordsIndex < 0 ? getAllChords() : getOneLetter(),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 0,
-                        height: 50,
-                      ),
-                    ]);
-              },
-            ),
-          ]),
-        ),
+                    ),
+                    const SizedBox(
+                      width: 0,
+                      height: 50,
+                    ),
+                  ]);
+            },
+          ),
+        ]),
       ),
-      drawer: MyDrawer(index: 2),
+      bottomNavigationBar: MyNavBar(index: 1),
     );
   }
 }

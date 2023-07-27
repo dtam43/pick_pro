@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
-import '/src/drawer.dart';
 import '/src/styles.dart';
+import '/src/navigation.dart';
 import '/src/error_popup.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'dart:ui' as ui;
 
 import 'dart:async';
 import 'dart:math';
 import 'package:just_audio/just_audio.dart';
 
-const Color darkBlue = Color(0xFF000c24);
-Color blueGreen = const Color.fromARGB(255, 121, 207, 175);
+const Color background = Color.fromARGB(255, 9, 11, 16);
+const Color foreground = Color.fromARGB(255, 0, 84, 181);
+const Color bobColor = Color.fromARGB(255, 12, 69, 134);
 
 // Tracking the condition of the metronome for animation
 enum MetronomeIs { playing, stopped, stopping }
@@ -244,73 +246,100 @@ class MetronomeState extends State<Metronome> {
     SizeManager size = SizeManager(context);
 
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'PickPro',
-            style: TextStyle(
-              fontSize: size.barFont,
-              fontFamily: 'Caveat',
-            ),
-          ),
-          centerTitle: true,
-          backgroundColor: blueGreen,
-        ),
-        body: SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          child: ConstrainedBox(
-            constraints:
-                BoxConstraints(minHeight: MediaQuery.of(context).size.height),
-            child: Container(
-              color: darkBlue,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: ConstrainedBox(
+          constraints:
+              BoxConstraints(minHeight: MediaQuery.of(context).size.height),
+          child: Container(
+            color: background,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: size.width < size.height
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Stack(alignment: Alignment.center, children: <Widget>[
-                      Image.asset(
-                        'assets/images/metronome.png',
-                        fit: BoxFit.fill,
-                        width: size.metronomeWidth,
-                        height: size.metronomeHeight,
+                    Padding(
+                      padding: EdgeInsets.only(
+                          left: size.titlePadding, top: size.titlePadding),
+                      child: Text(
+                        'Metronome',
+                        style: titleText(size.barFont),
+                      ),
+                    ),
+                    const SizedBox(width: 0, height: 0),
+                    Padding(
+                      padding: EdgeInsets.only(
+                          top: size.titlePadding, right: size.titlePadding),
+                      child: IconButton(
+                        icon: Icon(
+                            _metronomePlayer.metronomeIs == MetronomeIs.playing
+                                ? LucideIcons.pause
+                                : LucideIcons.play,
+                            color: foreground),
+                        iconSize: size.playButtonSize,
+                        onPressed:
+                            _metronomePlayer.metronomeIs == MetronomeIs.stopping
+                                ? null
+                                : () {
+                                    _metronomePlayer.metronomeIs ==
+                                            MetronomeIs.stopped
+                                        ? _start()
+                                        : _stop();
+                                  },
+                      ),
+                    ),
+                  ],
+                ),
+                Stack(
+                    alignment: AlignmentDirectional.topCenter,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(top: size.metronomePadding),
+                        child: Image.asset(
+                          'assets/images/metronome.png',
+                          fit: BoxFit.fitHeight,
+                          width: size.metronomeWidth,
+                          height: size.metronomeHeight,
+                        ),
                       ),
                       Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            SizedBox(
-                              width: size.bpmWidth,
-                              height: size.bpmHeight,
-                              child: TextField(
-                                textAlign: TextAlign.center,
-                                controller: _controller,
-                                keyboardType: TextInputType.number,
-                                enabled: _metronomePlayer.metronomeIs ==
-                                    MetronomeIs.stopped,
-                                style: TextStyle(
-                                  color: blueGreen,
-                                  fontSize: size.buttonFont,
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  top: size.bpmPaddingT,
+                                  bottom: size.bpmPaddingB),
+                              child: SizedBox(
+                                width: size.bpmWidth,
+                                height: size.bpmHeight,
+                                child: TextField(
+                                  textAlign: TextAlign.center,
+                                  controller: _controller,
+                                  keyboardType: TextInputType.number,
+                                  enabled: _metronomePlayer.metronomeIs ==
+                                      MetronomeIs.stopped,
+                                  style: bpmText(size.bpmFont),
+                                  decoration: InputDecoration(
+                                      hintText: _metronomePlayer.bpm.toString(),
+                                      hintStyle: bpmText(size.bpmFont),
+                                      alignLabelWithHint: true,
+                                      filled: true,
+                                      fillColor: Colors.transparent,
+                                      border: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                      contentPadding: EdgeInsets.zero),
+                                  cursorColor: Colors.white,
+                                  onSubmitted: (String value) {
+                                    _controller.clear();
+                                    _submitted(value);
+                                  },
                                 ),
-                                decoration: InputDecoration(
-                                    hintText: _metronomePlayer.bpm.toString(),
-                                    hintStyle: TextStyle(
-                                        color: blueGreen,
-                                        fontSize: size.buttonFont),
-                                    alignLabelWithHint: true,
-                                    filled: true,
-                                    fillColor: Colors.transparent,
-                                    border: InputBorder.none,
-                                    enabledBorder: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
-                                    contentPadding: EdgeInsets.zero),
-                                cursorColor: Colors.white,
-                                onSubmitted: (String value) {
-                                  _controller.clear();
-                                  _submitted(value);
-                                },
                               ),
-                            ),
-                            SizedBox(
-                              height: size.smallBox,
                             ),
                             LayoutBuilder(builder: (context, constraints) {
                               return _stick(
@@ -318,34 +347,13 @@ class MetronomeState extends State<Metronome> {
                             }),
                           ]),
                     ]),
-                    TextButton(
-                      style: buttonStyle(),
-                      onPressed:
-                          _metronomePlayer.metronomeIs == MetronomeIs.stopping
-                              ? null
-                              : () {
-                                  _metronomePlayer.metronomeIs ==
-                                          MetronomeIs.stopped
-                                      ? _start()
-                                      : _stop();
-                                },
-                      child: Text(
-                        _metronomePlayer.metronomeIs == MetronomeIs.stopped
-                            ? 'Play'
-                            : 'Stop',
-                        style: buttonText(size.buttonFont),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15.0,
-                    ),
-                  ],
-                ),
-              ),
+              ],
             ),
           ),
         ),
-        drawer: MyDrawer(index: 1));
+      ),
+      bottomNavigationBar: MyNavBar(index: 0),
+    );
   }
 
   // Widget to draw the metronome stick
@@ -448,14 +456,14 @@ class PendulumCoords {
 
   PendulumCoords(
       double width, double height, int bpm, int minTempo, int maxTempo) {
-    rotationCenter = Offset(0, 0);
+    rotationCenter = const Offset(0, 0);
     rotationCenterRadius = width / 45;
 
-    counterWeightCenter = Offset(0, height * 0.175);
-    counterWeightRadius = width / 20;
+    counterWeightCenter = Offset(0, height * 0.1);
+    counterWeightRadius = width / 15;
 
-    stickTop = Offset(0, -height * 0.68);
-    stickBottom = Offset(0, height * 0.175);
+    stickTop = Offset(0, -height * 0.9);
+    stickBottom = Offset(0, height * 0.1);
 
     double bobHeight = height / 15;
     bobMinY = stickTop.dy;
@@ -497,25 +505,26 @@ class MetronomePainter extends CustomPainter {
     // Initialize paints
     paints = {
       "stickColor": Paint()
-        ..color = const Color.fromARGB(255, 211, 211, 211)
+        ..color = background
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
-        ..strokeWidth = width * 0.02,
+        ..strokeWidth = width * 0.07,
+      "stickOutline": Paint()
+        ..color = foreground
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = width * 0.08,
       "outlineColor": Paint()
-        ..color = blueGreen
+        ..color = foreground
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
-        ..strokeWidth = width * 0.02,
+        ..strokeWidth = width * 0.005,
       "fillWeight": Paint()
-        ..color = blueGreen
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.fill,
-      "fillRotationCenter": Paint()
-        ..color = Colors.grey
+        ..color = background
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.fill,
       "fillBob": Paint()
-        ..color = blueGreen
+        ..color = background
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.fill,
     };
@@ -542,23 +551,23 @@ class MetronomePainter extends CustomPainter {
 
     // Coordinates for drawing the trapezoid
     List<Offset> bobPoints = List<Offset>.from([
-      Offset(pendulumCoords.bobCenter.dx + width / 20,
-          pendulumCoords.bobCenter.dy + height / 40),
-      Offset(pendulumCoords.bobCenter.dx - width / 20,
-          pendulumCoords.bobCenter.dy + height / 40),
-      Offset(pendulumCoords.bobCenter.dx - width / 12,
-          pendulumCoords.bobCenter.dy - height / 40),
-      Offset(pendulumCoords.bobCenter.dx + width / 12,
-          pendulumCoords.bobCenter.dy - height / 40),
+      Offset(pendulumCoords.bobCenter.dx + width / 15,
+          pendulumCoords.bobCenter.dy + height / 30),
+      Offset(pendulumCoords.bobCenter.dx - width / 15,
+          pendulumCoords.bobCenter.dy + height / 30),
+      Offset(pendulumCoords.bobCenter.dx - width / 9,
+          pendulumCoords.bobCenter.dy - height / 30),
+      Offset(pendulumCoords.bobCenter.dx + width / 9,
+          pendulumCoords.bobCenter.dy - height / 30),
     ]);
 
     Path bobPath = Path()..addPolygon(bobPoints, true);
 
     // Draw the metronome
     canvas.drawLine(pendulumCoords.stickTop, pendulumCoords.stickBottom,
+        paints["stickOutline"]!);
+    canvas.drawLine(pendulumCoords.stickTop, pendulumCoords.stickBottom,
         paints["stickColor"]!);
-    canvas.drawCircle(pendulumCoords.rotationCenter,
-        pendulumCoords.rotationCenterRadius, paints["fillRotationCenter"]!);
     canvas.drawCircle(pendulumCoords.counterWeightCenter,
         pendulumCoords.counterWeightRadius, paints["fillWeight"]!);
     canvas.drawCircle(pendulumCoords.counterWeightCenter,

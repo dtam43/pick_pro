@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '/src/drawer.dart';
 import '/src/styles.dart';
+import '/src/navigation.dart';
 import 'metronome.dart';
 import 'chords.dart';
 import 'player.dart';
 
-const Color darkBlue = Color(0xFF000c24);
-const Color blueGreen = Color.fromARGB(255, 121, 207, 175);
+const Color background = Color.fromARGB(255, 9, 11, 16);
+const Color foreground = Color.fromARGB(255, 0, 84, 181);
 
 void main() => runApp(MaterialApp(
         theme: ThemeData(
@@ -32,19 +32,8 @@ class Home extends StatelessWidget {
     SizeManager size = SizeManager(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'PickPro',
-          style: TextStyle(
-            fontSize: size.barFont,
-            fontFamily: 'Caveat',
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: blueGreen,
-      ),
       body: Container(
-        color: darkBlue,
+        color: background,
         child: Center(
           child: Stack(
             alignment: Alignment.center,
@@ -76,7 +65,7 @@ class Home extends StatelessWidget {
           ),
         ),
       ),
-      drawer: MyDrawer(index: 0),
+      bottomNavigationBar: MyNavBar(index: 0),
     );
   }
 }
