@@ -29,9 +29,6 @@ class MetronomePlayer {
 
   bool bobPanning = false;
 
-  // Preventing BPM editing during metronome playback
-  bool isLocked = false;
-
   // Variables for animation
   int lastFrameTime = 0;
   int lastEvenTick = 0;
@@ -74,7 +71,6 @@ class MetronomeState extends State<Metronome> {
     if (_metronomePlayer.metronomeIs == MetronomeIs.playing) {
       _metronomePlayer.lastEvenTick = DateTime.now().millisecondsSinceEpoch;
       _animate();
-      _metronomePlayer.isLocked = true;
     }
 
     _metronomePlayer.player.setAsset('assets/sounds/metronome.mp3');
@@ -95,9 +91,6 @@ class MetronomeState extends State<Metronome> {
     _metronomePlayer.player.pause();
     _metronomePlayer.player.seek(Duration.zero);
     _metronomePlayer.player.play();
-
-    // Lock text field
-    _metronomePlayer.isLocked = true;
 
     setState(() {});
   }
@@ -147,7 +140,6 @@ class MetronomeState extends State<Metronome> {
       _metronomePlayer.timer.cancel();
       _metronomePlayer.frameTimer.cancel();
       _resetAnimation();
-      _metronomePlayer.isLocked = false;
       _metronomePlayer.metronomeIs = MetronomeIs.stopped;
       setState(() {});
     }
@@ -263,77 +255,93 @@ class MetronomeState extends State<Metronome> {
           centerTitle: true,
           backgroundColor: blueGreen,
         ),
-        body: Container(
-          color: darkBlue,
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Stack(alignment: Alignment.center, children: <Widget>[
-                  Image.asset(
-                    'assets/images/metronome.png',
-                    fit: BoxFit.fill,
-                    width: size.metronomeWidth,
-                    height: size.metronomeHeight,
-                  ),
-                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-                    SizedBox(
-                      width: size.bpmWidth,
-                      height: size.bpmHeight,
-                      child: TextField(
-                        textAlign: TextAlign.center,
-                        controller: _controller,
-                        keyboardType: TextInputType.number,
-                        enabled: !_metronomePlayer.isLocked,
-                        style: TextStyle(
-                          color: blueGreen,
-                          fontSize: size.buttonFont,
-                        ),
-                        decoration: InputDecoration(
-                            hintText: _metronomePlayer.bpm.toString(),
-                            hintStyle: TextStyle(
-                                color: blueGreen, fontSize: size.buttonFont),
-                            alignLabelWithHint: true,
-                            filled: true,
-                            fillColor: Colors.transparent,
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            contentPadding: EdgeInsets.zero),
-                        cursorColor: Colors.white,
-                        onSubmitted: (String value) {
-                          _controller.clear();
-                          _submitted(value);
-                        },
+        body: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints:
+                BoxConstraints(minHeight: MediaQuery.of(context).size.height),
+            child: Container(
+              color: darkBlue,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Stack(alignment: Alignment.center, children: <Widget>[
+                      Image.asset(
+                        'assets/images/metronome.png',
+                        fit: BoxFit.fill,
+                        width: size.metronomeWidth,
+                        height: size.metronomeHeight,
+                      ),
+                      Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: size.bpmWidth,
+                              height: size.bpmHeight,
+                              child: TextField(
+                                textAlign: TextAlign.center,
+                                controller: _controller,
+                                keyboardType: TextInputType.number,
+                                enabled: _metronomePlayer.metronomeIs ==
+                                    MetronomeIs.stopped,
+                                style: TextStyle(
+                                  color: blueGreen,
+                                  fontSize: size.buttonFont,
+                                ),
+                                decoration: InputDecoration(
+                                    hintText: _metronomePlayer.bpm.toString(),
+                                    hintStyle: TextStyle(
+                                        color: blueGreen,
+                                        fontSize: size.buttonFont),
+                                    alignLabelWithHint: true,
+                                    filled: true,
+                                    fillColor: Colors.transparent,
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    contentPadding: EdgeInsets.zero),
+                                cursorColor: Colors.white,
+                                onSubmitted: (String value) {
+                                  _controller.clear();
+                                  _submitted(value);
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              height: size.smallBox,
+                            ),
+                            LayoutBuilder(builder: (context, constraints) {
+                              return _stick(
+                                  context, size.stickWidth, size.stickHeight);
+                            }),
+                          ]),
+                    ]),
+                    TextButton(
+                      style: buttonStyle(),
+                      onPressed:
+                          _metronomePlayer.metronomeIs == MetronomeIs.stopping
+                              ? null
+                              : () {
+                                  _metronomePlayer.metronomeIs ==
+                                          MetronomeIs.stopped
+                                      ? _start()
+                                      : _stop();
+                                },
+                      child: Text(
+                        _metronomePlayer.metronomeIs == MetronomeIs.stopped
+                            ? 'Play'
+                            : 'Stop',
+                        style: buttonText(size.buttonFont),
                       ),
                     ),
-                    LayoutBuilder(builder: (context, constraints) {
-                      return _stick(context, size.stickWidth, size.stickHeight);
-                    }),
-                  ]),
-                ]),
-                TextButton(
-                  style: buttonStyle(),
-                  onPressed: _metronomePlayer.metronomeIs ==
-                          MetronomeIs.stopping
-                      ? null
-                      : () {
-                          _metronomePlayer.metronomeIs == MetronomeIs.stopped
-                              ? _start()
-                              : _stop();
-                        },
-                  child: Text(
-                    _metronomePlayer.metronomeIs == MetronomeIs.stopped
-                        ? 'Play'
-                        : 'Stop',
-                    style: buttonText(),
-                  ),
+                    const SizedBox(
+                      height: 15.0,
+                    ),
+                  ],
                 ),
-                const SizedBox(
-                  height: 15.0,
-                ),
-              ],
+              ),
             ),
           ),
         ),

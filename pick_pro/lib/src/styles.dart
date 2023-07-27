@@ -23,12 +23,12 @@ class SizeManager {
       logoWidth = logoHeight * 0.417;
 
       buttonFont = width / 29.36;
-      bpmWidth = width / 13.7;
-      bpmHeight = height / 47.13;
-      metronomeWidth = width / 1.1;
-      metronomeHeight = height / 1.57;
-      stickWidth = width / 2.06;
-      stickHeight = height / 1.89;
+      bpmWidth = width / 11;
+      bpmHeight = height / 40;
+      metronomeWidth = width / 1;
+      metronomeHeight = metronomeWidth * 1.2;
+      stickWidth = width / 2.16;
+      stickHeight = stickWidth * 1.775;
 
       errorWidth = width / 2.055;
       errorHeight = height / 7.07;
@@ -41,36 +41,43 @@ class SizeManager {
 
       imageSize = width / 1.60;
       iconSize = (width / 11.28).floorToDouble();
+
+      smallBox = height / 70.7;
+      mediumBox = height / 47.13;
+      largeBox = height / 23.57;
+      landscapeBox = 0;
     } else {
-      barFont = width / 12.8;
-      titleFont = width / 6.42;
+      // Landscape Mode
+      barFont = height / 16;
+      titleFont = height / 8;
       logoHeight = height / 1.18;
       logoWidth = logoHeight * 0.417;
 
-      buttonFont = width / 29.36;
-      bpmWidth = width / 13.7;
-      bpmHeight = height / 47.13;
-      metronomeWidth = width / 1.1;
+      buttonFont = height / 40;
+      bpmHeight = height / 20;
+      bpmWidth = bpmHeight * 1.5;
       metronomeHeight = height / 1.57;
-      stickWidth = width / 2.06;
-      stickHeight = height / 1.89;
+      metronomeWidth = metronomeHeight / 1.2;
+      stickHeight = height / 2.5;
+      stickWidth = stickHeight / 1.875;
 
-      errorWidth = width / 2.055;
-      errorHeight = height / 7.07;
-      errorFont = width / 25.69;
+      errorWidth = width / 3;
+      errorHeight = height / 10;
+      errorFont = height / 35;
 
-      chordFont = width / 8.56;
+      chordFont = height / 10;
       dropWidth = width / 2.74;
       dropHeight = height / 14.14;
-      chordWidth = width / 2.055;
+      chordWidth = width / 4;
 
-      imageSize = width / 1.60;
-      iconSize = (width / 11.28).floorToDouble();
+      imageSize = height / 2.5;
+      iconSize = (height / 15).floorToDouble();
+
+      smallBox = height / 100;
+      mediumBox = height / 75;
+      largeBox = height / 25;
+      landscapeBox = 20;
     }
-
-    smallBox = height / 70.7;
-    mediumBox = height / 47.13;
-    largeBox = height / 23.57;
   }
 
   // Different sizes used in the app
@@ -104,6 +111,7 @@ class SizeManager {
   late double smallBox;
   late double mediumBox;
   late double largeBox;
+  late double landscapeBox;
 }
 
 // Preset Styles
@@ -113,7 +121,8 @@ ButtonStyle buttonStyle() {
     backgroundColor: MaterialStateProperty.all<Color>(blueGreen),
     overlayColor: MaterialStateProperty.all<Color>(
         const Color.fromARGB(255, 47, 147, 122)),
-    padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(10)),
+    padding: MaterialStateProperty.all<EdgeInsets>(
+        const EdgeInsets.symmetric(vertical: 10, horizontal: 20)),
     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
       RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
@@ -122,9 +131,9 @@ ButtonStyle buttonStyle() {
   );
 }
 
-TextStyle buttonText() {
-  return const TextStyle(
-    fontSize: 14.0,
+TextStyle buttonText(double fontSize) {
+  return TextStyle(
+    fontSize: fontSize,
     color: Colors.white,
   );
 }

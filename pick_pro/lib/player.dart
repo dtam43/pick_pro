@@ -125,134 +125,149 @@ class PlaybackState extends State<Playback> {
         centerTitle: true,
         backgroundColor: blueGreen,
       ),
-      body: Container(
-        color: darkBlue,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            // Load image info from metadata or load default image
-            _playerInfo.metaData.albumArt != null
-                ? Image.memory(_playerInfo.metaData.albumArt!,
-                    height: size.imageSize, width: size.imageSize)
-                : Image.asset('assets/images/logo.png',
-                    height: size.imageSize, width: size.imageSize),
-            SizedBox(height: size.smallBox),
-            Text('${_playerInfo.metaData.trackName}', style: buttonText()),
-            Text(
-                _playerInfo.metaData.trackArtistNames.toString().substring(
-                    1,
-                    _playerInfo.metaData.trackArtistNames.toString().length -
-                        1),
-                style: buttonText()),
-            SizedBox(height: size.smallBox),
-            Slider(
-                min: 0,
-                max: _playerInfo.songLength.inSeconds.toDouble(),
-                value: _playerInfo.currentTime.inSeconds.toDouble(),
-                onChanged: (value) {
-                  _playerInfo.currentTime = Duration(seconds: value.toInt());
-                  setState(() {
-                    _playerInfo.player.pause();
-                    _playerInfo.player.seek(_playerInfo.currentTime);
-                  });
-                }),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    formatTime(_playerInfo.currentTime),
-                    style: buttonText(),
-                  ),
-                  Text(
-                    formatTime(_playerInfo.songLength),
-                    style: buttonText(),
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(width: 25),
-                IconButton(
-                  icon: Icon(LucideIcons.rewind,
-                      size: size.iconSize, color: Colors.white),
-                  onPressed: () {
-                    _playerInfo.currentTime =
-                        _playerInfo.currentTime - const Duration(seconds: 10);
-                    if (_playerInfo.currentTime.inSeconds < 0) {
-                      _playerInfo.currentTime = Duration.zero;
-                    }
-                    _playerInfo.player.seek(_playerInfo.currentTime);
-                  },
-                ),
-                IconButton(
-                  icon: Icon(
-                      _playerInfo.isPlaying
-                          ? LucideIcons.pause
-                          : LucideIcons.play,
-                      color: Colors.white),
-                  iconSize: size.iconSize,
-                  onPressed: () {
-                    if (_playerInfo.isPlaying) {
-                      setState(() {
-                        _playerInfo.player.pause();
-                      });
-                    } else {
-                      setState(() {
-                        _playerInfo.player.resume();
-                      });
-                    }
-                  },
-                ),
-                IconButton(
-                  icon: Icon(LucideIcons.fastForward,
-                      size: size.iconSize, color: Colors.white),
-                  onPressed: () {
-                    _playerInfo.currentTime =
-                        _playerInfo.currentTime + const Duration(seconds: 10);
-                    if (_playerInfo.currentTime > _playerInfo.songLength) {
-                      _playerInfo.currentTime = _playerInfo.songLength;
-                    }
-                    _playerInfo.player.seek(_playerInfo.currentTime);
-                  },
-                ),
-                const SizedBox(width: 25, height: 0),
-              ],
-            ),
-            Row(
+      body: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints:
+              BoxConstraints(minHeight: MediaQuery.of(context).size.height),
+          child: Container(
+            color: darkBlue,
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Column(
+              children: <Widget>[
+                // Load image info from metadata or load default image
+                _playerInfo.metaData.albumArt != null
+                    ? Image.memory(_playerInfo.metaData.albumArt!,
+                        height: size.imageSize, width: size.imageSize)
+                    : Image.asset('assets/images/logo.png',
+                        height: size.imageSize, width: size.imageSize),
+                SizedBox(height: size.smallBox),
+                Text('${_playerInfo.metaData.trackName}',
+                    style: buttonText(size.buttonFont)),
+                Text(
+                    _playerInfo.metaData.trackArtistNames.toString().substring(
+                        1,
+                        _playerInfo.metaData.trackArtistNames
+                                .toString()
+                                .length -
+                            1),
+                    style: buttonText(size.buttonFont)),
+                SizedBox(height: size.smallBox),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      vertical: 0, horizontal: size.landscapeBox),
+                  child: Slider(
+                      min: 0,
+                      max: _playerInfo.songLength.inSeconds.toDouble(),
+                      value: _playerInfo.currentTime.inSeconds.toDouble(),
+                      onChanged: (value) {
+                        _playerInfo.currentTime =
+                            Duration(seconds: value.toInt());
+                        setState(() {
+                          _playerInfo.player.pause();
+                          _playerInfo.player.seek(_playerInfo.currentTime);
+                        });
+                      }),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        formatTime(_playerInfo.currentTime),
+                        style: buttonText(size.buttonFont),
+                      ),
+                      Text(
+                        formatTime(_playerInfo.songLength),
+                        style: buttonText(size.buttonFont),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(width: 25),
+                    IconButton(
+                      icon: Icon(LucideIcons.rewind,
+                          size: size.iconSize, color: Colors.white),
+                      onPressed: () {
+                        _playerInfo.currentTime = _playerInfo.currentTime -
+                            const Duration(seconds: 10);
+                        if (_playerInfo.currentTime.inSeconds < 0) {
+                          _playerInfo.currentTime = Duration.zero;
+                        }
+                        _playerInfo.player.seek(_playerInfo.currentTime);
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(
+                          _playerInfo.isPlaying
+                              ? LucideIcons.pause
+                              : LucideIcons.play,
+                          color: Colors.white),
+                      iconSize: size.iconSize,
+                      onPressed: () {
+                        if (_playerInfo.isPlaying) {
+                          setState(() {
+                            _playerInfo.player.pause();
+                          });
+                        } else {
+                          setState(() {
+                            _playerInfo.player.resume();
+                          });
+                        }
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(LucideIcons.fastForward,
+                          size: size.iconSize, color: Colors.white),
+                      onPressed: () {
+                        _playerInfo.currentTime = _playerInfo.currentTime +
+                            const Duration(seconds: 10);
+                        if (_playerInfo.currentTime > _playerInfo.songLength) {
+                          _playerInfo.currentTime = _playerInfo.songLength;
+                        }
+                        _playerInfo.player.seek(_playerInfo.currentTime);
+                      },
+                    ),
+                    const SizedBox(width: 25, height: 0),
+                  ],
+                ),
+                SizedBox(height: size.landscapeBox),
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(height: size.mediumBox),
-                    Slider(
-                        min: 0.5,
-                        max: 1.5,
-                        value: _playerInfo.playbackSpeed,
-                        onChanged: (value) {
-                          _playerInfo.playbackSpeed =
-                              double.parse(value.toStringAsFixed(2));
-                          _playerInfo.player.pause();
-                          _playerInfo.player
-                              .setPlaybackRate(_playerInfo.playbackSpeed);
-                          setState(() {});
-                        }),
-                    Text(
-                      'Speed: ${_playerInfo.playbackSpeed}x',
-                      style: buttonText(),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: size.mediumBox),
+                        Slider(
+                            min: 0.5,
+                            max: 1.5,
+                            value: _playerInfo.playbackSpeed,
+                            onChanged: (value) {
+                              _playerInfo.playbackSpeed =
+                                  double.parse(value.toStringAsFixed(2));
+                              _playerInfo.player
+                                  .setPlaybackRate(_playerInfo.playbackSpeed);
+                              setState(() {});
+                            }),
+                        Text(
+                          'Speed: ${_playerInfo.playbackSpeed}x',
+                          style: buttonText(size.buttonFont),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
       drawer: MyDrawer(index: 3),
