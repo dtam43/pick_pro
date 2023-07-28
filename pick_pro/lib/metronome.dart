@@ -29,8 +29,6 @@ class MetronomePlayer {
       Timer.periodic(const Duration(milliseconds: 0), (Timer t) {});
   int bpm = 100;
 
-  bool bobPanning = false;
-
   // Variables for animation
   int lastFrameTime = 0;
   int lastEvenTick = 0;
@@ -128,9 +126,9 @@ class MetronomeState extends State<Metronome> {
   void _onTick(Timer t) {
     // Tracking length since tick passed every other tick
     _metronomePlayer.lastTickWasEven = t.tick % 2 == 0;
-    if (_metronomePlayer.lastTickWasEven)
+    if (_metronomePlayer.lastTickWasEven) {
       _metronomePlayer.lastEvenTick = DateTime.now().millisecondsSinceEpoch;
-
+    }
     // Playing sound
     if (_metronomePlayer.metronomeIs == MetronomeIs.playing) {
       _metronomePlayer.player.pause();
@@ -267,7 +265,7 @@ class MetronomeState extends State<Metronome> {
                           left: size.titlePadding, top: size.titlePadding),
                       child: Text(
                         'Metronome',
-                        style: titleText(size.barFont),
+                        style: titleText(size.titleFont),
                       ),
                     ),
                     const SizedBox(width: 0, height: 0),
@@ -300,7 +298,9 @@ class MetronomeState extends State<Metronome> {
                       Padding(
                         padding: EdgeInsets.only(top: size.metronomePadding),
                         child: Image.asset(
-                          'assets/images/metronome.png',
+                          size.width < size.height
+                              ? 'assets/images/metronome.png'
+                              : 'assets/images/metronome_l.png',
                           fit: BoxFit.fitHeight,
                           width: size.metronomeWidth,
                           height: size.metronomeHeight,
@@ -357,41 +357,26 @@ class MetronomeState extends State<Metronome> {
   }
 
   // Widget to draw the metronome stick
-  Widget _stick(BuildContext context, width, double height) {
-    return SizedBox(
-      width: width,
-      height: height,
-
-      // Gesture Detector to detect panning on the weight
-      child: GestureDetector(
-        // When weight is clicked or tapped, enable movement
-        onPanDown: (dragDownDetails) {
+  Widget _stick(BuildContext context, double width, double height) {
+    // Gesture detector to recognize tapping the weight
+    return GestureDetector(
+      // When weight is moved
+      onPanUpdate: (dragUpdateDetails) {
+        // Only allow adjustment when metronome is off
+        if (_metronomePlayer.metronomeIs == MetronomeIs.stopped) {
           RenderBox box = context.findRenderObject() as RenderBox;
           Offset localPosition =
-              box.globalToLocal(dragDownDetails.globalPosition);
-          if (_weightTapTest(width, height, localPosition))
-            _metronomePlayer.bobPanning = true;
-        },
+              box.globalToLocal(dragUpdateDetails.globalPosition);
 
-        // When weight is moved
-        onPanUpdate: (dragUpdateDetails) {
-          if (_metronomePlayer.bobPanning) {
-            RenderBox box = context.findRenderObject() as RenderBox;
-            Offset localPosition =
-                box.globalToLocal(dragUpdateDetails.globalPosition);
+          // Update bpm value
+          _weightDragged(width, height, localPosition);
+        }
+      },
 
-            // Update bpm value
-            _weightDragged(width, height, localPosition);
-          }
-        },
-        onPanEnd: (dragEndDetails) {
-          _metronomePlayer.bobPanning = false;
-        },
-        onPanCancel: () {
-          _metronomePlayer.bobPanning = false;
-        },
-
-        // Draw metronome
+      // Draw metronome
+      child: SizedBox(
+        width: width,
+        height: height,
         child: CustomPaint(
           foregroundPainter: MetronomePainter(
               width: width,
@@ -404,20 +389,6 @@ class MetronomeState extends State<Metronome> {
         ),
       ),
     );
-  }
-
-  // Method to test if the weight has been tapped
-  bool _weightTapTest(double width, double height, Offset localPosition) {
-    if (_metronomePlayer.metronomeIs != MetronomeIs.stopped) return false;
-
-    // Compare local position to the previous stored weight coordinates
-    Offset translatedLocalPos =
-        localPosition.translate(-width / 2, -height * 0.75);
-    PendulumCoords pendulumCoords = PendulumCoords(
-        width, height, _metronomePlayer.bpm, _minTempo, _maxTempo);
-
-    return ((translatedLocalPos.dy - pendulumCoords.bobCenter.dy).abs() <
-        height / 20);
   }
 
   // Method to track the movement of the weight and update the bpm value

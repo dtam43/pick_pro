@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:pick_pro/src/styles.dart';
 
 const Color background = Color.fromARGB(255, 9, 11, 16);
 const Color foreground = Color.fromARGB(255, 0, 84, 181);
@@ -13,6 +14,7 @@ class MyNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SizeManager size = SizeManager(context);
     return Container(
       decoration: BoxDecoration(boxShadow: [
         BoxShadow(
@@ -38,23 +40,25 @@ class MyNavBar extends StatelessWidget {
         ],
         type: BottomNavigationBarType.fixed,
         currentIndex: 0,
-        iconSize: 25,
+        iconSize: size.iconSize,
         elevation: 150,
         selectedItemColor: selectedItemColor,
         backgroundColor: background,
         onTap: (value) {
-          Navigator.pop(context);
-          switch (value) {
-            case 0:
-              Navigator.pushNamed(context, '/');
-              break;
-            case 1:
-              Navigator.pushNamed(context, '/chords');
-              break;
-            case 2:
-              Navigator.pushNamed(context, '/player');
-              break;
-            default:
+          if (index != value) {
+            Navigator.pop(context);
+            switch (value) {
+              case 0:
+                Navigator.pushNamed(context, '/');
+                break;
+              case 1:
+                Navigator.pushNamed(context, '/chords');
+                break;
+              case 2:
+                Navigator.pushNamed(context, '/player');
+                break;
+              default:
+            }
           }
         },
       ),

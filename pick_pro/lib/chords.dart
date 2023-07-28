@@ -34,7 +34,7 @@ class ChordState extends State<Chords> {
                     left: size.titlePadding, top: size.titlePadding),
                 child: Text(
                   'Chords List',
-                  style: titleText(size.barFont),
+                  style: titleText(size.titleFont),
                 ),
               ),
               Row(
@@ -51,7 +51,7 @@ class ChordState extends State<Chords> {
                                 ? 'All Chords'
                                 : showChords[chordsIndex].toUpperCase(),
                             style: TextStyle(
-                              fontSize: size.buttonFont,
+                              fontSize: size.chordFont,
                               color: Colors.white,
                             ),
                           ),
@@ -63,42 +63,42 @@ class ChordState extends State<Chords> {
                             DropdownMenuItem<int>(
                               value: -1,
                               child: Text('All',
-                                  style: TextStyle(fontSize: size.buttonFont)),
+                                  style: TextStyle(fontSize: size.chordFont)),
                             ),
                             DropdownMenuItem<int>(
                               value: 0,
                               child: Text('C',
-                                  style: TextStyle(fontSize: size.buttonFont)),
+                                  style: TextStyle(fontSize: size.chordFont)),
                             ),
                             DropdownMenuItem<int>(
                               value: 1,
                               child: Text('D',
-                                  style: TextStyle(fontSize: size.buttonFont)),
+                                  style: TextStyle(fontSize: size.chordFont)),
                             ),
                             DropdownMenuItem<int>(
                               value: 2,
                               child: Text('E',
-                                  style: TextStyle(fontSize: size.buttonFont)),
+                                  style: TextStyle(fontSize: size.chordFont)),
                             ),
                             DropdownMenuItem<int>(
                               value: 3,
                               child: Text('F',
-                                  style: TextStyle(fontSize: size.buttonFont)),
+                                  style: TextStyle(fontSize: size.chordFont)),
                             ),
                             DropdownMenuItem<int>(
                               value: 4,
                               child: Text('G',
-                                  style: TextStyle(fontSize: size.buttonFont)),
+                                  style: TextStyle(fontSize: size.chordFont)),
                             ),
                             DropdownMenuItem<int>(
                               value: 5,
                               child: Text('A',
-                                  style: TextStyle(fontSize: size.buttonFont)),
+                                  style: TextStyle(fontSize: size.chordFont)),
                             ),
                             DropdownMenuItem<int>(
                               value: 6,
                               child: Text('B',
-                                  style: TextStyle(fontSize: size.buttonFont)),
+                                  style: TextStyle(fontSize: size.chordFont)),
                             ),
                           ],
                           borderRadius: BorderRadius.circular(15),
@@ -120,7 +120,7 @@ class ChordState extends State<Chords> {
                                     ? 'Flat'
                                     : 'Normal',
                             style: TextStyle(
-                              fontSize: size.buttonFont,
+                              fontSize: size.chordFont,
                               color: Colors.white,
                             ),
                           ),
@@ -134,21 +134,21 @@ class ChordState extends State<Chords> {
                               value: 0,
                               child: Text(
                                 'Flat',
-                                style: TextStyle(fontSize: size.buttonFont),
+                                style: TextStyle(fontSize: size.chordFont),
                               ),
                             ),
                             DropdownMenuItem<int>(
                               value: 1,
                               child: Text(
                                 'Normal',
-                                style: TextStyle(fontSize: size.buttonFont),
+                                style: TextStyle(fontSize: size.chordFont),
                               ),
                             ),
                             DropdownMenuItem<int>(
                               value: 2,
                               child: Text(
                                 'Sharp',
-                                style: TextStyle(fontSize: size.buttonFont),
+                                style: TextStyle(fontSize: size.chordFont),
                               ),
                             ),
                           ],

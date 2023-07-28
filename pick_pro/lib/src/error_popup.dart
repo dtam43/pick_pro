@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pick_pro/src/styles.dart';
 
-const Color darkBlue = Color(0xFF000c24);
-const Color blueGreen = Color.fromARGB(255, 121, 207, 175);
+const Color foreground = Color.fromARGB(255, 0, 84, 181);
 
 // Overlay Popup to display in case of errors
 class ErrorPopup {
@@ -26,7 +25,7 @@ class ErrorPopup {
                   width: size.errorWidth,
                   height: size.errorHeight,
                   decoration: BoxDecoration(
-                    color: blueGreen.withOpacity(0.9),
+                    color: foreground.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Column(

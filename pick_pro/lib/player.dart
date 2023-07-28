@@ -96,208 +96,484 @@ class PlaybackState extends State<Playback> {
               BoxConstraints(minHeight: MediaQuery.of(context).size.height),
           child: Container(
             color: background,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: size.width < size.height
-                  ? CrossAxisAlignment.start
-                  : CrossAxisAlignment.center,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(
-                          left: size.titlePadding, top: size.titlePadding),
-                      child: Text(
-                        'Playback',
-                        style: titleText(size.barFont),
-                      ),
-                    ),
-                    const SizedBox(width: 0, height: 0),
-                    Padding(
-                      padding: EdgeInsets.only(
-                          top: size.titlePadding, right: size.titlePadding),
-                      child: IconButton(
-                          onPressed: () async {
-                            final result = await FilePicker.platform.pickFiles(
-                                type: FileType.custom,
-                                allowedExtensions: ['mp3']);
-
-                            // Load file if a proper file is chosen
-                            if (result != null) {
-                              loadFile(result);
-                            }
-
-                            setState(() {});
-                          },
-                          icon: Icon(
-                            LucideIcons.copyPlus,
-                            size: size.iconSize,
-                            color: foreground,
-                          )),
-                    ),
-                  ],
-                ),
-                // Load image info from metadata or load default image
-                Padding(
-                  padding: EdgeInsets.only(
-                      left: size.titlePadding,
-                      top: size.smallBox,
-                      bottom: size.smallBox),
-                  child: _playerInfo.metaData.albumArt != null
-                      ? Image.memory(_playerInfo.metaData.albumArt!,
-                          height: size.imageSize, width: size.imageSize)
-                      : Image.asset('assets/images/logo.png',
-                          height: size.imageSize, width: size.imageSize),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: size.titlePadding),
-                  child: Text('${_playerInfo.metaData.trackName}',
-                      style: songText(size.songSize),
-                      textAlign: TextAlign.left),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: size.titlePadding),
-                  child: Text(
-                    _playerInfo.metaData.trackArtistNames.toString().substring(
-                        1,
-                        _playerInfo.metaData.trackArtistNames
-                                .toString()
-                                .length -
-                            1),
-                    style: artistText(size.artistSize),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                      top: size.smallBox,
-                      left: size.sliderPadding,
-                      right: size.sliderPadding),
-                  child: Slider(
-                    min: 0,
-                    max: _playerInfo.songLength.inSeconds.toDouble(),
-                    value: _playerInfo.currentTime.inSeconds.toDouble(),
-                    onChanged: (value) {
-                      _playerInfo.currentTime =
-                          Duration(seconds: value.toInt());
-                      _playerInfo.player.pause();
-                      _playerInfo.player.seek(_playerInfo.currentTime);
-                      setState(() {});
-                    },
-                    activeColor: foreground,
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: size.titlePadding, vertical: 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        formatTime(_playerInfo.currentTime),
-                        style: timeText(size.artistSize),
-                      ),
-                      Text(
-                        formatTime(_playerInfo.songLength),
-                        style: timeText(size.artistSize),
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(width: 0, height: 0),
-                    IconButton(
-                      icon: Icon(
-                        LucideIcons.rewind,
-                        size: size.playButtonSize,
-                        color: foreground,
-                      ),
-                      onPressed: () {
-                        _playerInfo.currentTime = _playerInfo.currentTime -
-                            const Duration(seconds: 10);
-                        if (_playerInfo.currentTime.inSeconds < 0) {
-                          _playerInfo.currentTime = Duration.zero;
-                        }
-                        _playerInfo.player.seek(_playerInfo.currentTime);
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(
-                          _playerInfo.isPlaying
-                              ? LucideIcons.pause
-                              : LucideIcons.play,
-                          color: foreground),
-                      iconSize: size.playButtonSize,
-                      onPressed: () {
-                        if (_playerInfo.isPlaying) {
-                          setState(() {
-                            _playerInfo.player.pause();
-                          });
-                        } else {
-                          setState(() {
-                            _playerInfo.player.resume();
-                          });
-                        }
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(LucideIcons.fastForward,
-                          size: size.playButtonSize, color: foreground),
-                      onPressed: () {
-                        _playerInfo.currentTime = _playerInfo.currentTime +
-                            const Duration(seconds: 10);
-                        if (_playerInfo.currentTime > _playerInfo.songLength) {
-                          _playerInfo.currentTime = _playerInfo.songLength;
-                        }
-                        _playerInfo.player.seek(_playerInfo.currentTime);
-                      },
-                    ),
-                    const SizedBox(width: 0, height: 0),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+            // Portrait Orientation
+            child: size.width < size.height
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SliderTheme(
-                            data: const SliderThemeData(
-                              thumbShape:
-                                  RoundSliderThumbShape(enabledThumbRadius: 5),
-                            ),
-                            child: Slider(
-                              min: 0.5,
-                              max: 1.5,
-                              value: _playerInfo.playbackSpeed,
-                              onChanged: (value) {
-                                _playerInfo.playbackSpeed =
-                                    double.parse(value.toStringAsFixed(2));
-                                _playerInfo.player
-                                    .setPlaybackRate(_playerInfo.playbackSpeed);
-                                setState(() {});
-                              },
-                              activeColor: foreground,
+                          Padding(
+                            padding: EdgeInsets.only(
+                                left: size.titlePadding,
+                                top: size.titlePadding),
+                            child: Text(
+                              'Audio Player',
+                              style: titleText(size.titleFont),
                             ),
                           ),
-                          Text(
-                            'Speed: ${_playerInfo.playbackSpeed}x',
-                            style: timeText(size.buttonFont),
+                          const SizedBox(width: 0, height: 0),
+                          Padding(
+                            padding: EdgeInsets.only(
+                                top: size.titlePadding,
+                                right: size.titlePadding),
+                            child: IconButton(
+                                onPressed: () async {
+                                  final result = await FilePicker.platform
+                                      .pickFiles(
+                                          type: FileType.custom,
+                                          allowedExtensions: ['mp3']);
+
+                                  // Load file if a proper file is chosen
+                                  if (result != null) {
+                                    loadFile(result);
+                                  }
+
+                                  setState(() {});
+                                },
+                                icon: Icon(
+                                  LucideIcons.copyPlus,
+                                  size: size.iconSize,
+                                  color: foreground,
+                                )),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                      // Load image info from metadata or load default image
+                      Padding(
+                        padding: EdgeInsets.only(
+                            left: size.titlePadding,
+                            top: size.smallBox,
+                            bottom: size.smallBox),
+                        child: _playerInfo.metaData.albumArt != null
+                            ? Image.memory(_playerInfo.metaData.albumArt!,
+                                height: size.imageSize, width: size.imageSize)
+                            : Image.asset('assets/images/logo.png',
+                                height: size.imageSize, width: size.imageSize),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: size.titlePadding),
+                        child: Text('${_playerInfo.metaData.trackName}',
+                            style: songText(size.headerFont),
+                            textAlign: TextAlign.left),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: size.titlePadding),
+                        child: Text(
+                          _playerInfo.metaData.trackArtistNames
+                              .toString()
+                              .substring(
+                                  1,
+                                  _playerInfo.metaData.trackArtistNames
+                                          .toString()
+                                          .length -
+                                      1),
+                          style: artistText(size.bodyFont),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(
+                            top: size.smallBox,
+                            left: size.sliderPadding,
+                            right: size.sliderPadding),
+                        child: Slider(
+                          min: 0,
+                          max: _playerInfo.songLength.inSeconds.toDouble(),
+                          value: _playerInfo.currentTime.inSeconds.toDouble(),
+                          onChanged: (value) {
+                            _playerInfo.currentTime =
+                                Duration(seconds: value.toInt());
+                            _playerInfo.player.pause();
+                            _playerInfo.player.seek(_playerInfo.currentTime);
+                            setState(() {});
+                          },
+                          activeColor: foreground,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: size.titlePadding, vertical: 0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              formatTime(_playerInfo.currentTime),
+                              style: timeText(size.bodyFont),
+                            ),
+                            Text(
+                              formatTime(_playerInfo.songLength),
+                              style: timeText(size.bodyFont),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(width: 0, height: 0),
+                          IconButton(
+                            icon: Icon(
+                              LucideIcons.rewind,
+                              size: size.playButtonSize,
+                              color: foreground,
+                            ),
+                            onPressed: () {
+                              _playerInfo.currentTime =
+                                  _playerInfo.currentTime -
+                                      const Duration(seconds: 10);
+                              if (_playerInfo.currentTime.inSeconds < 0) {
+                                _playerInfo.currentTime = Duration.zero;
+                              }
+                              _playerInfo.player.seek(_playerInfo.currentTime);
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(
+                                _playerInfo.isPlaying
+                                    ? LucideIcons.pause
+                                    : LucideIcons.play,
+                                color: foreground),
+                            iconSize: size.playButtonSize,
+                            onPressed: () {
+                              if (_playerInfo.isPlaying) {
+                                setState(() {
+                                  _playerInfo.player.pause();
+                                });
+                              } else {
+                                setState(() {
+                                  _playerInfo.player.resume();
+                                });
+                              }
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(LucideIcons.fastForward,
+                                size: size.playButtonSize, color: foreground),
+                            onPressed: () {
+                              _playerInfo.currentTime =
+                                  _playerInfo.currentTime +
+                                      const Duration(seconds: 10);
+                              if (_playerInfo.currentTime >
+                                  _playerInfo.songLength) {
+                                _playerInfo.currentTime =
+                                    _playerInfo.songLength;
+                              }
+                              _playerInfo.player.seek(_playerInfo.currentTime);
+                            },
+                          ),
+                          const SizedBox(width: 0, height: 0),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SliderTheme(
+                                  data: const SliderThemeData(
+                                    thumbShape: RoundSliderThumbShape(
+                                        enabledThumbRadius: 5),
+                                  ),
+                                  child: Slider(
+                                    min: 0.5,
+                                    max: 1.5,
+                                    value: _playerInfo.playbackSpeed,
+                                    onChanged: (value) {
+                                      _playerInfo.playbackSpeed = double.parse(
+                                          value.toStringAsFixed(2));
+                                      _playerInfo.player.setPlaybackRate(
+                                          _playerInfo.playbackSpeed);
+                                      setState(() {});
+                                    },
+                                    activeColor: foreground,
+                                  ),
+                                ),
+                                Text(
+                                  'Speed: ${_playerInfo.playbackSpeed}x',
+                                  style: timeText(size.smallFont),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                : // Landscape Orientation
+                Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(
+                                left: size.titlePadding,
+                                top: size.titlePadding),
+                            child: Text(
+                              'Playback',
+                              style: titleText(size.titleFont),
+                            ),
+                          ),
+                          const SizedBox(width: 0, height: 0),
+                          Padding(
+                            padding: EdgeInsets.only(
+                                top: size.titlePadding,
+                                right: size.titlePadding),
+                            child: IconButton(
+                                onPressed: () async {
+                                  final result = await FilePicker.platform
+                                      .pickFiles(
+                                          type: FileType.custom,
+                                          allowedExtensions: ['mp3']);
+
+                                  // Load file if a proper file is chosen
+                                  if (result != null) {
+                                    loadFile(result);
+                                  }
+
+                                  setState(() {});
+                                },
+                                icon: Icon(
+                                  LucideIcons.copyPlus,
+                                  size: size.iconSize,
+                                  color: foreground,
+                                )),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(
+                                left: size.titlePadding, top: size.smallBox),
+                            child: _playerInfo.metaData.albumArt != null
+                                ? Image.memory(_playerInfo.metaData.albumArt!,
+                                    height: size.imageSize,
+                                    width: size.imageSize)
+                                : Image.asset('assets/images/logo.png',
+                                    height: size.imageSize,
+                                    width: size.imageSize),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 80),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Padding(
+                                  padding:
+                                      EdgeInsets.only(top: size.titlePadding),
+                                  child: Text(
+                                      '${_playerInfo.metaData.trackName}',
+                                      style: songText(size.headerFont),
+                                      textAlign: TextAlign.left),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      top: size.smallBox,
+                                      bottom: size.sliderPadding),
+                                  child: Text(
+                                    _playerInfo.metaData.trackArtistNames
+                                        .toString()
+                                        .substring(
+                                            1,
+                                            _playerInfo
+                                                    .metaData.trackArtistNames
+                                                    .toString()
+                                                    .length -
+                                                1),
+                                    style: artistText(size.bodyFont),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: size.columnWidth,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Slider(
+                                        min: 0,
+                                        max: _playerInfo.songLength.inSeconds
+                                            .toDouble(),
+                                        value: _playerInfo.currentTime.inSeconds
+                                            .toDouble(),
+                                        onChanged: (value) {
+                                          _playerInfo.currentTime =
+                                              Duration(seconds: value.toInt());
+                                          _playerInfo.player.pause();
+                                          _playerInfo.player
+                                              .seek(_playerInfo.currentTime);
+                                          setState(() {});
+                                        },
+                                        activeColor: foreground,
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            vertical: 0,
+                                            horizontal: size.timePadding),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              formatTime(
+                                                  _playerInfo.currentTime),
+                                              style: timeText(size.bodyFont),
+                                            ),
+                                            Text(
+                                              formatTime(
+                                                  _playerInfo.songLength),
+                                              style: timeText(size.bodyFont),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(width: 0, height: 0),
+                                          IconButton(
+                                            icon: Icon(
+                                              LucideIcons.rewind,
+                                              size: size.playButtonSize,
+                                              color: foreground,
+                                            ),
+                                            onPressed: () {
+                                              _playerInfo.currentTime =
+                                                  _playerInfo.currentTime -
+                                                      const Duration(
+                                                          seconds: 10);
+                                              if (_playerInfo
+                                                      .currentTime.inSeconds <
+                                                  0) {
+                                                _playerInfo.currentTime =
+                                                    Duration.zero;
+                                              }
+                                              _playerInfo.player.seek(
+                                                  _playerInfo.currentTime);
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                                _playerInfo.isPlaying
+                                                    ? LucideIcons.pause
+                                                    : LucideIcons.play,
+                                                color: foreground),
+                                            iconSize: size.playButtonSize,
+                                            onPressed: () {
+                                              if (_playerInfo.isPlaying) {
+                                                setState(() {
+                                                  _playerInfo.player.pause();
+                                                });
+                                              } else {
+                                                setState(() {
+                                                  _playerInfo.player.resume();
+                                                });
+                                              }
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(LucideIcons.fastForward,
+                                                size: size.playButtonSize,
+                                                color: foreground),
+                                            onPressed: () {
+                                              _playerInfo.currentTime =
+                                                  _playerInfo.currentTime +
+                                                      const Duration(
+                                                          seconds: 10);
+                                              if (_playerInfo.currentTime >
+                                                  _playerInfo.songLength) {
+                                                _playerInfo.currentTime =
+                                                    _playerInfo.songLength;
+                                              }
+                                              _playerInfo.player.seek(
+                                                  _playerInfo.currentTime);
+                                            },
+                                          ),
+                                          const SizedBox(width: 0, height: 0),
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 5),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                SliderTheme(
+                                                  data: const SliderThemeData(
+                                                    thumbShape:
+                                                        RoundSliderThumbShape(
+                                                            enabledThumbRadius:
+                                                                5),
+                                                  ),
+                                                  child: Slider(
+                                                    min: 0.5,
+                                                    max: 1.5,
+                                                    value: _playerInfo
+                                                        .playbackSpeed,
+                                                    onChanged: (value) {
+                                                      _playerInfo
+                                                              .playbackSpeed =
+                                                          double.parse(value
+                                                              .toStringAsFixed(
+                                                                  2));
+                                                      _playerInfo.player
+                                                          .pause();
+                                                      _playerInfo.player
+                                                          .setPlaybackRate(
+                                                              _playerInfo
+                                                                  .playbackSpeed);
+                                                      setState(() {});
+                                                    },
+                                                    activeColor: foreground,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  'Speed: ${_playerInfo.playbackSpeed}x',
+                                                  style:
+                                                      timeText(size.smallFont),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),
