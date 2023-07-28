@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
-const Color darkBlue = Color(0xFF000c24);
-const Color blueGreen = Color.fromARGB(255, 121, 207, 175);
 const Color background = Color.fromARGB(255, 9, 11, 16);
 const Color foreground = Color.fromARGB(255, 0, 84, 181);
 const Color titleColour = Color.fromARGB(255, 31, 64, 121);
 
+// Class to manage sizes of widgets based on screen dimensions
 class SizeManager {
   double width = 411;
   double height = 707;
@@ -22,11 +21,8 @@ class SizeManager {
     if (width < height) {
       titlePadding = width / 10.55;
       iconSize = (width / 16.44).floorToDouble();
-
       barFont = width / 15;
       titleFont = width / 6.42;
-      logoHeight = height / 1.18;
-      logoWidth = logoHeight * 0.417;
 
       buttonFont = width / 29.36;
       bpmFont = width / 25;
@@ -53,10 +49,9 @@ class SizeManager {
       playButtonSize = (width / 15).floorToDouble();
       songSize = width / 25;
       artistSize = width / 28;
-      sliderPadding = width / 15.55;
+      sliderPadding = width / 26.55;
 
       smallBox = height / 70.7;
-      mediumBox = height / 47.13;
       largeBox = height / 23.57;
     } else {
       // Landscape Mode
@@ -65,8 +60,6 @@ class SizeManager {
 
       barFont = height / 16;
       titleFont = height / 8;
-      logoHeight = height / 1.18;
-      logoWidth = logoHeight * 0.417;
 
       buttonFont = height / 40;
       bpmFont = width / 75;
@@ -96,17 +89,14 @@ class SizeManager {
       sliderPadding = height / 15.55;
 
       smallBox = height / 100;
-      mediumBox = height / 75;
       largeBox = height / 25;
     }
   }
 
   // Different sizes used in the app
   late double barFont;
+  late double iconSize;
   late double titleFont;
-  late double logoWidth;
-  late double logoHeight;
-
   late double titlePadding;
 
   late double buttonFont;
@@ -134,13 +124,11 @@ class SizeManager {
 
   late double imageSize;
   late double playButtonSize;
-  late double iconSize;
   late double songSize;
   late double artistSize;
   late double sliderPadding;
 
   late double smallBox;
-  late double mediumBox;
   late double largeBox;
 }
 

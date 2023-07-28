@@ -46,7 +46,7 @@ class MyNavBar extends StatelessWidget {
           Navigator.pop(context);
           switch (value) {
             case 0:
-              Navigator.pushNamed(context, '/metronome');
+              Navigator.pushNamed(context, '/');
               break;
             case 1:
               Navigator.pushNamed(context, '/chords');
