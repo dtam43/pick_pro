@@ -2,8 +2,6 @@
 
 <img src="pick_pro/assets/images/demo/hero.png" height="400" alt="logo"/>
 
-> Note: App is still in development; design and layout subject to change.
-
 PickPro is a tool that empowers guitarists to learn their favourite songs.
 
 ## Features
@@ -16,7 +14,6 @@ PickPro has 3 main functionalities:
 These features can all be accessed simultaneously, meaning you can overlay the metronome over your songs or reference chords as the song is playing.
 
 ## App Screenshots
-*As the app is still in development, the designs of these pages are subject to change.*
 
 > Metronome
 
