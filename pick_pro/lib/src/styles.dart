@@ -45,7 +45,7 @@ class SizeManager {
       chordFont = width / 35;
       headerFont = width / 25;
       bodyFont = width / 28;
-      smallFont = height / 35;
+      smallFont = width / 35;
 
       smallBox = height / 70.7;
       largeBox = height / 23.57;
