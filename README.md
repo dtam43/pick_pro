@@ -4,6 +4,13 @@
 
 PickPro is a tool that empowers guitarists to learn their favourite songs.
 
+<a href="https://apps.apple.com/ca/app/pickpro/id6458536609"> 
+  <img src="https://img.shields.io/badge/App%20Store-00599C?style=for-the-badge&logo=apple&logoColor=white">
+</a> 
+<a href="https://apps.apple.com/ca/app/pickpro/id6458536609">
+  <img src="https://img.shields.io/badge/Google%20Play-34B529?style=for-the-badge&logo=google-play&logoColor=white">
+</a>
+
 ## Features
 
 PickPro has 3 main functionalities: 
